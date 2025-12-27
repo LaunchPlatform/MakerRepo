@@ -5,6 +5,7 @@ description = "Open source library that brings Manufacturing As Code concept int
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "build123d>=0.10.0",
     "click>=8.3.1",
     "ocp-vscode>=3.0.1",
     "rich>=14.2.0",
