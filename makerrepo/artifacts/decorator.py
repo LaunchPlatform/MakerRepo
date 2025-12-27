@@ -1,21 +1,13 @@
-import dataclasses
 import typing
 
 import venusian
 
-from . import constants
-
-
-@dataclasses.dataclass(frozen=True)
-class Artifact:
-    module: str
-    name: str
-    func: typing.Callable
-    sample: bool
+from .. import constants
+from .data_types import Artifact
 
 
 def artifact(
-    func: typing.Callable | None = None, sample: bool = False
+    func: typing.Callable | None = None, *, sample: bool = False
 ) -> typing.Callable:
     def decorator(wrapped: typing.Callable):
         artifact_obj = Artifact(
