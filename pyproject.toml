@@ -1,0 +1,7 @@
+[project]
+name = "makerrepo"
+version = "0.1.0"
+description = "Open source library that brings Manufacturing As Code concept into build123d ecosystem"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = []
