@@ -22,7 +22,12 @@ def artifact(
                 raise ValueError("Name is not the same")
             scanner.registry.add(artifact_obj)
 
-        venusian.attach(wrapped, callback, category=constants.MR_ARTIFACTS_CATEGORY)
+        venusian.attach(
+            wrapped,
+            callback,
+            category=constants.MR_ARTIFACTS_CATEGORY,
+            depth=1 if func is None else 2,
+        )
         return wrapped
 
     if func is not None:
