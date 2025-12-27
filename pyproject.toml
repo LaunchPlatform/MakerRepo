@@ -5,5 +5,15 @@ description = "Open source library that brings Manufacturing As Code concept int
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "click>=8.3.1",
+    "rich>=14.2.0",
     "venusian>=3.1.1",
+]
+
+[project.scripts]
+mr = "mr.cmds.main:cli"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
 ]
