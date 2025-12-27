@@ -7,12 +7,12 @@ from mr.artifacts.registry import collect
 
 @artifact
 def artifact_without_params():
-    pass
+    return "artifact_without_params"
 
 
 @artifact(sample=True)
 def sample_artifact():
-    pass
+    return "sample_artifact"
 
 
 def test_collect():
@@ -34,3 +34,5 @@ def test_collect():
             ),
         }
     }
+    assert artifact_without_params() == "artifact_without_params"
+    assert sample_artifact() == "sample_artifact"
