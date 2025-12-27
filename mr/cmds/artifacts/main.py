@@ -45,12 +45,26 @@ def collect_artifacts(module_spec: str) -> Registry:
 def view(env: Environment, module: str, artifacts: tuple[str, ...]):
     registry = collect_artifacts(module)
     if not artifacts:
-        target_artifacts = list(list(registry.artifacts)[0])[0]
+        target_artifacts = [list(list(registry.artifacts)[0])[0]]
         logger.info(
             "No artifacts provided, use the first one %s/%s",
             target_artifacts.module,
             target_artifacts.name,
         )
+    else:
+        if len(registry.artifacts) > 1:
+            raise ValueError("Unexpected more than one modules found")
+        module_artifacts = list(registry.artifacts)[0]
+        target_artifacts = [
+            module_artifacts[artifact_name] for artifact_name in artifacts
+        ]
+
+    # TODO: this is going to be a bit slow, provide a progress bar & cache?
+    realized_artifacts = [artifact.func() for artifact in target_artifacts]
+    # defer the import to make testing mocking much easier
+    from ocp_vscode import show
+
+    show(realized_artifacts)
 
 
 @cli.command(help="Export artifact")

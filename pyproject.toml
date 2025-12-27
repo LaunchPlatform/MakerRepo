@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "click>=8.3.1",
+    "ocp-vscode>=3.0.1",
     "rich>=14.2.0",
     "venusian>=3.1.1",
 ]

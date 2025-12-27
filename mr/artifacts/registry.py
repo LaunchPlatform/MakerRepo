@@ -11,7 +11,7 @@ from .data_types import Artifact
 class Registry:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
-        self.artifacts = collections.defaultdict(dict)
+        self.artifacts: dict[str, dict[str, Artifact]] = collections.defaultdict(dict)
 
     def add(self, artifact: Artifact):
         module_artifacts = self.artifacts[artifact.module]
