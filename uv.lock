@@ -1,0 +1,22 @@
+version = 1
+requires-python = ">=3.11"
+
+[[package]]
+name = "makerrepo"
+version = "0.1.0"
+source = { virtual = "." }
+dependencies = [
+    { name = "venusian" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "venusian", specifier = ">=3.1.1" }]
+
+[[package]]
+name = "venusian"
+version = "3.1.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/70/4c/eefa68085c555dc11e6744b9c6fbe5966b1c9378c47267776a448923e9a5/venusian-3.1.1.tar.gz", hash = "sha256:534fb3b355669283eb3954581931e5d1d071fce61d029d58f3219a5e3a6f0c41", size = 39269 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/5a/4b/34d926eba40db81b204066a60b4efdc5d8867a8efcbfe44d69b634b1c907/venusian-3.1.1-py3-none-any.whl", hash = "sha256:0845808a985976acbceaa1fbb871c7fac4fb28ae75453232970e9c2c2866dbf4", size = 14026 },
+]
