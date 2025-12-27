@@ -1,4 +1,5 @@
 import importlib.util
+import logging
 import os.path
 import pathlib
 from types import ModuleType
@@ -10,6 +11,8 @@ from ...artifacts.registry import Registry
 from ..environment import Environment
 from ..environment import pass_env
 from .cli import cli
+
+logger = logging.getLogger(__name__)
 
 
 def load_module(module_spec: str) -> ModuleType:
@@ -29,14 +32,25 @@ def load_module(module_spec: str) -> ModuleType:
 
 
 def collect_artifacts(module_spec: str) -> Registry:
-    return collect([load_module(module_spec)])
+    registry = collect([load_module(module_spec)])
+    if not registry.artifacts:
+        logger.error("No artifacts found")
+    return registry
 
 
 @cli.command(help="View artifact")
 @click.argument("MODULE")
+@click.argument("ARTIFACTS", nargs=-1)
 @pass_env
-def view(env: Environment, module: str):
+def view(env: Environment, module: str, artifacts: tuple[str, ...]):
     registry = collect_artifacts(module)
+    if not artifacts:
+        target_artifacts = list(list(registry.artifacts)[0])[0]
+        logger.info(
+            "No artifacts provided, use the first one %s/%s",
+            target_artifacts.module,
+            target_artifacts.name,
+        )
 
 
 @cli.command(help="Export artifact")
