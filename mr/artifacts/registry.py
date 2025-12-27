@@ -14,7 +14,12 @@ class Registry:
         self.artifacts = collections.defaultdict(dict)
 
     def add(self, artifact: Artifact):
-        self.artifacts[artifact.module][artifact.name] = artifact
+        module_artifacts = self.artifacts[artifact.module]
+        if artifact.name in module_artifacts:
+            raise KeyError(
+                f"artifact {artifact.name} already exists in {artifact.module}"
+            )
+        module_artifacts[artifact.name] = artifact
 
 
 def collect(packages: list[typing.Any], registry: Registry | None = None) -> Registry:
