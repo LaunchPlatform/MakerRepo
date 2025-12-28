@@ -33,7 +33,10 @@ from .environment import pass_env
 @click.version_option(prog_name="mr", package_name="mr")
 @pass_env
 def cli(
-    env: Environment, log_level: str, log_format: str, disable_rich_log: bool, app: str
+    env: Environment,
+    log_level: str,
+    log_format: str,
+    disable_rich_log: bool,
 ):
     env.log_level = LogLevel(log_level)
 

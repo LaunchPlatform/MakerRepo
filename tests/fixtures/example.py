@@ -6,7 +6,7 @@ from mr import artifact
 class ExampleBox(BasePartObject):
     def __init__(
         self,
-        box_width: float = 10 * mm,
+        box_width: float = 10 * MM,
         box_length: float = 10 * MM,
         box_height: float = 10 * MM,
         rotation: RotationLike = (0, 0, 0),

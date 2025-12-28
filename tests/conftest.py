@@ -11,4 +11,4 @@ def cli_runner() -> CliRunner:
 
 @pytest.fixture
 def fixtures_folder() -> pathlib.Path:
-    return pathlib.Path(__name__).parent / "fixtures"
+    return pathlib.Path(__file__).parent / "fixtures"

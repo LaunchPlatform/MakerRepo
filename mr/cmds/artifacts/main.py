@@ -2,6 +2,7 @@ import importlib.util
 import logging
 import os.path
 import pathlib
+from importlib.machinery import SourceFileLoader
 from types import ModuleType
 
 import click
@@ -19,15 +20,7 @@ def load_module(module_spec: str) -> ModuleType:
     if module_spec.lower().endswith(".py") and os.path.exists(module_spec):
         module_path = pathlib.Path(module_spec)
         module_name = module_path.stem
-        spec = importlib.util.spec_from_file_location(module_name, module_path)
-        if spec is None or spec.loader is None:
-            raise ImportError(
-                f"Could not load spec for module '{module_name}' at: {module_path}"
-            )
-
-        module_obj = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module_obj)
-        return module_obj
+        return SourceFileLoader(module_name, str(module_path)).load_module(module_name)
     return importlib.import_module(module_spec)
 
 
@@ -45,12 +38,13 @@ def collect_artifacts(module_spec: str) -> Registry:
 def view(env: Environment, module: str, artifacts: tuple[str, ...]):
     registry = collect_artifacts(module)
     if not artifacts:
-        target_artifacts = [list(list(registry.artifacts)[0])[0]]
+        target_artifact = list(list(registry.artifacts.values())[0].values())[0]
         logger.info(
             "No artifacts provided, use the first one %s/%s",
-            target_artifacts.module,
-            target_artifacts.name,
+            target_artifact.module,
+            target_artifact.name,
         )
+        target_artifacts = [target_artifact]
     else:
         if len(registry.artifacts) > 1:
             raise ValueError("Unexpected more than one modules found")

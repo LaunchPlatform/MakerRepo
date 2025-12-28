@@ -1,4 +1,4 @@
-from . import artifacts  # no qa
+from .artifacts import main  # no qa
 from .cli import cli
 
 __ALL__ = [cli]
