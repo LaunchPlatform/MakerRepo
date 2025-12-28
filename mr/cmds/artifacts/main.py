@@ -50,7 +50,11 @@ def collect_artifacts(module_spec: str) -> Registry:
 def list(env: Environment, module: str):
     registry = collect_artifacts(module)
 
-    env.logger.info("Listing artifacts for %s", module)
+    env.logger.info(
+        "Listing artifacts for [blue]%s[/]",
+        module,
+        extra={"markup": True, "highlighter": None},
+    )
 
     table = Table(
         title="Artifacts",
@@ -62,10 +66,10 @@ def list(env: Environment, module: str):
     table.add_column("Name", style=TABLE_COLUMN_STYLE)
     table.add_column("Sample", style=TABLE_COLUMN_STYLE)
     for module, artifacts in registry.artifacts.items():
-        table.add_row(escape(module), "", "")
-        # env.logger.info("Module: %s", module)
-        # for name in artifacts:
-        #     env.logger.info("    %s", name)
+        for i, (name, artifact) in enumerate(artifacts.items()):
+            table.add_row(
+                escape(module) if i == 0 else "", escape(name), str(artifact.sample)
+            )
     rich.print(Padding(table, (1, 0, 0, 4)))
 
 

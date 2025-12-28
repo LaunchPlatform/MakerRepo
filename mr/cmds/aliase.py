@@ -2,7 +2,7 @@ import click
 from click.core import Context
 
 CMD_ALIAS_MAP = {
-    # TODO:
+    "ls": "list",
 }
 
 
