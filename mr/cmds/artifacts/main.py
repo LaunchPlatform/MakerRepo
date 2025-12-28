@@ -37,6 +37,18 @@ def collect_artifacts(module_spec: str) -> Registry:
     return registry
 
 
+@cli.command(help="List artifacts")
+@click.argument("MODULE")
+@pass_env
+def list(env: Environment, module: str):
+    registry = collect_artifacts(module)
+    env.logger.info("Listing artifacts for %s", module)
+    for module, artifacts in registry.artifacts.items():
+        env.logger.info("Module: %s", module)
+        for name in artifacts:
+            env.logger.info("    %s", name)
+
+
 @cli.command(help="View artifact")
 @click.argument("MODULE")
 @click.argument("ARTIFACTS", nargs=-1)
