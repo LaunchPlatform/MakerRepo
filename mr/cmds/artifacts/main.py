@@ -44,10 +44,10 @@ def collect_artifacts(module_spec: str) -> Registry:
     return registry
 
 
-@cli.command(help="List artifacts")
+@cli.command(name="list", help="List artifacts")
 @click.argument("MODULE")
 @pass_env
-def list(env: Environment, module: str):
+def list_artifacts(env: Environment, module: str):
     registry = collect_artifacts(module)
 
     env.logger.info(
@@ -76,8 +76,11 @@ def list(env: Environment, module: str):
 @cli.command(help="View artifact")
 @click.argument("MODULE")
 @click.argument("ARTIFACTS", nargs=-1)
+@click.option(
+    "-p", "--port", help="OCP Viewer port to send the model data to", default=3939
+)
 @pass_env
-def view(env: Environment, module: str, artifacts: tuple[str, ...]):
+def view(env: Environment, module: str, artifacts: tuple[str, ...], port: int):
     registry = collect_artifacts(module)
     if not artifacts:
         target_artifact = list(list(registry.artifacts.values())[0].values())[0]
@@ -90,7 +93,7 @@ def view(env: Environment, module: str, artifacts: tuple[str, ...]):
     else:
         if len(registry.artifacts) > 1:
             raise ValueError("Unexpected more than one modules found")
-        module_artifacts = list(registry.artifacts)[0]
+        module_artifacts = list(registry.artifacts.values())[0]
         target_artifacts = [
             module_artifacts[artifact_name] for artifact_name in artifacts
         ]
@@ -101,7 +104,7 @@ def view(env: Environment, module: str, artifacts: tuple[str, ...]):
     from ocp_vscode import show
 
     # TODO: pass in some args
-    show(realized_artifacts)
+    show(realized_artifacts, port=port)
 
 
 @cli.command(help="Export artifact")
