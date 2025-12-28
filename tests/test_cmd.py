@@ -117,7 +117,7 @@ async def ws_server(msg_handler: MockMsgHandler, unused_tcp_port: int):
 @pytest.mark.parametrize(
     "module",
     [
-        # "examples/main.py",
+        "examples/main.py",
         "examples.main",
     ],
 )
@@ -142,3 +142,5 @@ async def test_view(
         assert result.exit_code == 0
 
     await asyncio.wait_for(asyncio.to_thread(operate), 10)
+    assert len(msg_handler.data_msgs) == 1
+    assert len(msg_handler.backend_msgs) == 1
