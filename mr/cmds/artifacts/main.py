@@ -1,4 +1,4 @@
-import importlib.util
+import importlib
 import logging
 import os.path
 import pathlib
