@@ -2,7 +2,9 @@
 name = "makerrepo"
 version = "0.1.0"
 description = "Open source library that brings Manufacturing As Code concept into build123d ecosystem"
+authors = [{ name = "Fang-Pen Lin", email = "fangpen@launchplatform.com" }]
 readme = "README.md"
+license = "MIT"
 requires-python = ">=3.11"
 dependencies = [
     "build123d>=0.10.0",
