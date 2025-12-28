@@ -7,6 +7,11 @@ from importlib.machinery import SourceFileLoader
 from types import ModuleType
 
 import click
+import rich
+from rich import box
+from rich.markup import escape
+from rich.padding import Padding
+from rich.table import Table
 
 from ...artifacts.registry import collect
 from ...artifacts.registry import Registry
@@ -15,6 +20,8 @@ from ..environment import pass_env
 from .cli import cli
 
 logger = logging.getLogger(__name__)
+TABLE_HEADER_STYLE = "yellow"
+TABLE_COLUMN_STYLE = "cyan"
 
 
 def load_module(module_spec: str) -> ModuleType:
@@ -42,11 +49,24 @@ def collect_artifacts(module_spec: str) -> Registry:
 @pass_env
 def list(env: Environment, module: str):
     registry = collect_artifacts(module)
+
     env.logger.info("Listing artifacts for %s", module)
+
+    table = Table(
+        title="Artifacts",
+        box=box.SIMPLE,
+        header_style=TABLE_HEADER_STYLE,
+        expand=True,
+    )
+    table.add_column("Module", style=TABLE_COLUMN_STYLE)
+    table.add_column("Name", style=TABLE_COLUMN_STYLE)
+    table.add_column("Sample", style=TABLE_COLUMN_STYLE)
     for module, artifacts in registry.artifacts.items():
-        env.logger.info("Module: %s", module)
-        for name in artifacts:
-            env.logger.info("    %s", name)
+        table.add_row(escape(module), "", "")
+        # env.logger.info("Module: %s", module)
+        # for name in artifacts:
+        #     env.logger.info("    %s", name)
+    rich.print(Padding(table, (1, 0, 0, 4)))
 
 
 @cli.command(help="View artifact")
