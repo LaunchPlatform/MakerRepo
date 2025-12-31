@@ -24,43 +24,34 @@ def find_python_modules(path: pathlib.Path) -> list[pathlib.Path]:
     Find top-level Python packages (directories with __init__.py) and modules (.py files)
     in the given path, excluding common test package names and setup files.
     """
-    # Common test package/module names to exclude
-    test_names = {
-        "test",
-        "tests",
-        "_test",
-        "_tests",
-        "pytest",
-        "unittest",
-        "testing",
-        "conftest",
-        "setup",
+    ignored_names = {
         "setup.py",
+        "conftest.py",
     }
 
     modules = []
 
     # Find Python packages (directories with __init__.py)
     for item in path.iterdir():
-        if item.is_dir():
-            # Check if it's a Python package (has __init__.py)
-            init_file = item / "__init__.py"
-            if init_file.exists():
-                # Exclude test-related directories
-                if item.name not in test_names and not item.name.startswith("test_"):
-                    modules.append(item)
+        if not item.is_dir():
+            continue
+        if item.name.lower().startswith("test"):
+            continue
+        if not (item / "__init__.py").exists():
+            continue
+        modules.append(item)
 
     # Find Python modules (.py files)
     for file in path.glob("*.py"):
-        if file.is_file():
-            stem = file.stem
-            # Exclude __init__, test files, and setup files
-            if (
-                stem != "__init__"
-                and stem not in test_names
-                and not stem.startswith("test_")
-                and not stem.endswith("_test")
-            ):
-                modules.append(file)
+        if not file.is_file():
+            continue
+        stem = file.stem
+        if stem == "__init__":
+            continue
+        if stem.lower() in ignored_names:
+            continue
+        if stem.lower().startswith("test"):
+            continue
+        modules.append(file)
 
     return modules
