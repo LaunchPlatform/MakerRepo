@@ -25,3 +25,9 @@ class ExampleBox(BasePartObject):
 def main():
     box = ExampleBox()
     return box
+
+
+@artifact(sample=True)
+def sample():
+    box = ExampleBox()
+    return box
