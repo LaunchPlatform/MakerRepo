@@ -1,10 +1,4 @@
-import importlib
 import logging
-import os.path
-import pathlib
-import sys
-from importlib.machinery import SourceFileLoader
-from types import ModuleType
 
 import click
 import rich
@@ -15,6 +9,7 @@ from rich.table import Table
 
 from ...artifacts.registry import collect
 from ...artifacts.registry import Registry
+from ...artifacts.utils import load_module
 from ..environment import Environment
 from ..environment import pass_env
 from .cli import cli
@@ -22,19 +17,6 @@ from .cli import cli
 logger = logging.getLogger(__name__)
 TABLE_HEADER_STYLE = "yellow"
 TABLE_COLUMN_STYLE = "cyan"
-
-
-def load_module(module_spec: str) -> ModuleType:
-    if module_spec.lower().endswith(".py") and os.path.exists(module_spec):
-        module_path = pathlib.Path(module_spec)
-        module_name = module_path.stem
-        return SourceFileLoader(module_name, str(module_path)).load_module(module_name)
-    try:
-        current_dir = str(pathlib.Path.cwd())
-        sys.path.insert(0, current_dir)
-        return importlib.import_module(module_spec)
-    finally:
-        del sys.path[0]
 
 
 def collect_artifacts(module_spec: str) -> Registry:
