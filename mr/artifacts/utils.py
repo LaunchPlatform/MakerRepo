@@ -19,10 +19,29 @@ def load_module(module_spec: str) -> ModuleType:
         del sys.path[0]
 
 
+def find_python_packages(path: pathlib.Path) -> list[str]:
+    """
+    Find top-level Python packages (directories with __init__.py) in the given path,
+    excluding common test package names.
+    """
+    packages = []
+
+    for item in path.iterdir():
+        if not item.is_dir():
+            continue
+        if item.name.lower().startswith("test"):
+            continue
+        if not (item / "__init__.py").exists():
+            continue
+        packages.append(item.name)
+
+    return packages
+
+
 def find_python_modules(path: pathlib.Path) -> list[pathlib.Path]:
     """
-    Find top-level Python packages (directories with __init__.py) and modules (.py files)
-    in the given path, excluding common test package names and setup files.
+    Find top-level Python modules (.py files) in the given path,
+    excluding common test module names and setup files.
     """
     ignored_names = {
         "setup.py",
@@ -31,17 +50,6 @@ def find_python_modules(path: pathlib.Path) -> list[pathlib.Path]:
 
     modules = []
 
-    # Find Python packages (directories with __init__.py)
-    for item in path.iterdir():
-        if not item.is_dir():
-            continue
-        if item.name.lower().startswith("test"):
-            continue
-        if not (item / "__init__.py").exists():
-            continue
-        modules.append(item)
-
-    # Find Python modules (.py files)
     for file in path.glob("*.py"):
         if not file.is_file():
             continue

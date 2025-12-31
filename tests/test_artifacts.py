@@ -8,6 +8,7 @@ from mr import Artifact
 from mr import artifact
 from mr.artifacts.registry import collect
 from mr.artifacts.utils import find_python_modules
+from mr.artifacts.utils import find_python_packages
 from mr.artifacts.utils import load_module
 
 
@@ -45,25 +46,42 @@ def test_collect():
 
 
 @pytest.mark.parametrize(
-    "subdir,expected_in,expected_not_in",
+    "subdir,expected_packages",
     [
-        ("examples", ["main"], ["test_example", "tests", "__init__"]),
-        ("pkg_example", ["mypkg"], []),
+        ("examples", []),
+        ("pkg_example", ["mypkg"]),
+    ],
+)
+def test_find_python_packages(
+    fixtures_folder: pathlib.Path,
+    subdir: str,
+    expected_packages: list[str],
+):
+    path = fixtures_folder / subdir
+    packages = find_python_packages(path)
+    assert set(packages) == set(expected_packages), (
+        f"Expected packages {expected_packages} but got {packages} in {subdir}"
+    )
+
+
+@pytest.mark.parametrize(
+    "subdir,expected_modules",
+    [
+        ("examples", ["main"]),
+        ("pkg_example", []),
     ],
 )
 def test_find_python_modules(
     fixtures_folder: pathlib.Path,
     subdir: str,
-    expected_in: list[str],
-    expected_not_in: list[str],
+    expected_modules: list[str],
 ):
     path = fixtures_folder / subdir
     modules = find_python_modules(path)
-    module_names = {m.name if m.is_dir() else m.stem for m in modules}
-    for name in expected_in:
-        assert name in module_names, f"Expected {name} to be found in {subdir}"
-    for name in expected_not_in:
-        assert name not in module_names, f"Expected {name} not to be found in {subdir}"
+    module_names = {m.stem for m in modules}
+    assert set(module_names) == set(expected_modules), (
+        f"Expected modules {expected_modules} but got {module_names} in {subdir}"
+    )
 
 
 @pytest.mark.parametrize(
