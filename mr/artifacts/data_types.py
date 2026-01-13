@@ -8,3 +8,5 @@ class Artifact:
     name: str
     func: typing.Callable
     sample: bool
+    filepath: str | None = None
+    lineno: int | None = None

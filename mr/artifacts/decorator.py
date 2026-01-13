@@ -10,11 +10,14 @@ def artifact(
     func: typing.Callable | None = None, *, sample: bool = False
 ) -> typing.Callable:
     def decorator(wrapped: typing.Callable):
+        code = getattr(wrapped, "__code__", None)
         artifact_obj = Artifact(
             module=wrapped.__module__,
             name=wrapped.__name__,
             func=wrapped,
             sample=sample,
+            filepath=code.co_filename if code else None,
+            lineno=code.co_firstlineno if code else None,
         )
 
         def callback(scanner: venusian.Scanner, name: str, ob: typing.Callable):
