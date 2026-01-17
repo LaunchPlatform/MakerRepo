@@ -9,7 +9,12 @@ requires-python = ">=3.11"
 dependencies = [
     "build123d>=0.10.0",
     "click>=8.3.1",
+    "greenlet>=3.3.0",
+    "httpx>=0.25.0",
     "ocp-vscode>=3.0.1",
+    "pip>=25.3",
+    "playwright>=1.40.0",
+    "pydantic>=2.12.5",
     "rich>=13.7.1",
     "venusian>=3.1.1",
 ]

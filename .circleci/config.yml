@@ -15,6 +15,12 @@ jobs:
           name: Install uv
           command: pip install uv
       - run:
+          name: Install Playwright system dependencies
+          command: uv run playwright install-deps
+      - run:
+          name: Install Playwright browsers
+          command: uv run playwright install
+      - run:
           name: Run test
           command: uv run python -m pytest ./tests -svvvv
   build-and-publish:

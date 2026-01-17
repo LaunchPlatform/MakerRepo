@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            body {
+                margin: 0;
+            }
+            #cad_view {
+                width: 100vw;
+                height: 100vh;
+            }
+        </style>
+        <link rel="stylesheet" href="./three-cad-viewer-3.6.3.css" />
+    </head>
+    <body>
+        <div id="cad_view"></div>
+        <script src="./three-cad-viewer-3.6.3.js"></script>
+        <script src="./utils.js"></script>
+        <script>
+            const container = document.getElementById("cad_view");
+
+            let display = null;
+            let viewer = null;
+            // Load model with config from JSON
+            // All config keys are passed through - each component uses what it recognizes
+            window.loadModel = (data) => {
+                const modelData = data.model;
+                const config = data.config;
+
+                CadUtils.decode(modelData)
+
+                // Initialize display and viewer on first load
+                if (!display) {
+                    display = new CadViewer.Display(container, config);
+                    viewer = new CadViewer.Viewer(display, config, () => {});
+                }
+
+                viewer.render(modelData.shapes, config, config);
+
+                // Resize viewer after render (camera must exist first)
+                viewer.resizeCadView(
+                    config.cadWidth,
+                    config.treeWidth,
+                    config.height,
+                    config.glass
+                );
+
+                if (
+                    config.tab &&
+                    ["tree", "clip", "material", "zebra"].includes(config.tab)
+                ) {
+                    viewer.display.selectTabByName(config.tab);
+                    delete config.tab;
+                }
+
+                if (
+                    config.reset_camera &&
+                    ["iso", "left", "right", "top", "bottom", "rear", "front"].includes(config.reset_camera)
+                ) {
+                    viewer.display.setView(config.reset_camera);
+                    delete config.reset_camera;
+                }
+
+                if (config.render_edges === false) {
+                    const g = viewer.nestedGroup.rootGroup.name.replace("|", "/");
+                    viewer.setState(g, [1, 0]);
+                }
+                if (config.render_faces === false) {
+                    const g = viewer.nestedGroup.rootGroup.name.replace("|", "/");
+                    viewer.setState(g, [0, 1]);
+                }
+            };
+
+            window.isReady = () => viewer && viewer.ready;
+
+            window.getImage = (taskId) => viewer.getImage(taskId);
+        </script>
+    </body>
+</html>

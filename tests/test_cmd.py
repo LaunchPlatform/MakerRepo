@@ -144,3 +144,42 @@ async def test_view(
     await asyncio.wait_for(asyncio.to_thread(operate), 10)
     assert len(msg_handler.data_msgs) == 1
     assert len(msg_handler.backend_msgs) == 1
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "module",
+    [
+        "examples/main.py",
+        "examples.main",
+    ],
+)
+async def test_snapshot(
+    monkeypatch: MonkeyPatch,
+    cli_runner: CliRunner,
+    fixtures_folder: pathlib.Path,
+    module: str,
+    tmp_path: pathlib.Path,
+):
+    monkeypatch.syspath_prepend(fixtures_folder)
+
+    def operate():
+        output_file = tmp_path / "test_snapshot.png"
+        with switch_cwd(fixtures_folder):
+            result = cli_runner.invoke(
+                cli,
+                ["artifacts", "snapshot", module, "main", "-o", str(output_file)],
+                catch_exceptions=False,
+            )
+        assert result.exit_code == 0
+        # Verify output file was created
+        assert output_file.exists()
+        # Verify it's a valid PNG image (PNG magic bytes: 89 50 4E 47)
+        screenshot_bytes = output_file.read_bytes()
+        assert len(screenshot_bytes) > 0, "Screenshot should not be empty"
+        assert screenshot_bytes.startswith(b"\x89PNG\r\n\x1a\n"), (
+            "Screenshot should be a valid PNG image"
+        )
+
+    # Use real CADViewerService - increase timeout for browser launch
+    await asyncio.wait_for(asyncio.to_thread(operate), 60)

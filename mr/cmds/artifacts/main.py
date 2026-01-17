@@ -1,4 +1,5 @@
 import logging
+import pathlib
 
 import click
 import rich
@@ -13,6 +14,7 @@ from ...artifacts.utils import load_module
 from ..environment import Environment
 from ..environment import pass_env
 from .cli import cli
+from .utils import convert
 
 logger = logging.getLogger(__name__)
 TABLE_HEADER_STYLE = "yellow"
@@ -95,3 +97,61 @@ def view(env: Environment, module: str, artifacts: tuple[str, ...], port: int):
 def export(env: Environment, module: str):
     registry = collect_artifacts(module)
     # TODO:
+
+
+@cli.command(name="snapshot", help="Capture a snapshot from artifacts")
+@click.argument("MODULE")
+@click.argument("ARTIFACTS", nargs=-1)
+@click.option(
+    "-o",
+    "--output",
+    help="Output image file path",
+    default="snapshot.png",
+    type=click.Path(path_type=pathlib.Path),
+)
+@pass_env
+def snapshot(
+    env: Environment, module: str, artifacts: tuple[str, ...], output: pathlib.Path
+):
+    """Capture a screenshot from artifacts."""
+    import asyncio
+
+    from ...artifacts.capture_image import CADViewerService
+
+    registry = collect_artifacts(module)
+    if not artifacts:
+        target_artifact = list(list(registry.artifacts.values())[0].values())[0]
+        env.logger.info(
+            "No artifacts provided, use the first one %s/%s",
+            target_artifact.module,
+            target_artifact.name,
+        )
+        target_artifacts = [target_artifact]
+    else:
+        if len(registry.artifacts) > 1:
+            raise ValueError("Unexpected more than one modules found")
+        module_artifacts = list(registry.artifacts.values())[0]
+        target_artifacts = [
+            module_artifacts[artifact_name] for artifact_name in artifacts
+        ]
+
+    # Realize artifacts
+    realized_artifacts = [artifact.func() for artifact in target_artifacts]
+
+    # Convert to model data format using convert from utils
+    model_data = convert(realized_artifacts)
+
+    async def capture_snapshot():
+        env.logger.info("Starting CAD viewer service...")
+        async with CADViewerService(logger=env.logger) as viewer:
+            env.logger.info("Loading CAD model data...")
+            await viewer.load_cad_data(model_data.model_dump(mode="json"))
+
+            env.logger.info("Taking screenshot...")
+            screenshot_bytes = await viewer.take_screenshot()
+
+            # Save screenshot to file
+            output.write_bytes(screenshot_bytes)
+            env.logger.info("Screenshot saved to %s", output.absolute())
+
+    asyncio.run(capture_snapshot())
