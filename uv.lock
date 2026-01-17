@@ -882,8 +882,8 @@ wheels = [
 
 [[package]]
 name = "makerrepo"
-version = "0.1.6"
-source = { virtual = "." }
+version = "0.1.7"
+source = { editable = "." }
 dependencies = [
     { name = "build123d" },
     { name = "click" },

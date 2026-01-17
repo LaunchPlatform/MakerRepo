@@ -1,6 +1,6 @@
 [project]
 name = "makerrepo"
-version = "0.1.6"
+version = "0.1.7"
 description = "Open source library that brings Manufacturing As Code concept into build123d ecosystem"
 authors = [{ name = "Fang-Pen Lin", email = "fangpen@launchplatform.com" }]
 readme = "README.md"
@@ -28,3 +28,10 @@ dev = [
     "pytest>=9.0.2",
     "websockets>=13.1",
 ]
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.package-data]
+mr = ["data/*"]
