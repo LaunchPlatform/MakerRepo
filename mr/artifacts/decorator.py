@@ -1,3 +1,5 @@
+import inspect
+import textwrap
 import typing
 
 import venusian
@@ -7,15 +9,24 @@ from .data_types import Artifact
 
 
 def artifact(
-    func: typing.Callable | None = None, *, sample: bool = False
+    func: typing.Callable | None = None,
+    *,
+    sample: bool = False,
+    cover: bool = False,
+    desc: str | None = None,
 ) -> typing.Callable:
     def decorator(wrapped: typing.Callable):
+        nonlocal desc
         code = getattr(wrapped, "__code__", None)
+        if desc is None:
+            desc = inspect.getdoc(wrapped)
         artifact_obj = Artifact(
             module=wrapped.__module__,
             name=wrapped.__name__,
             func=wrapped,
             sample=sample,
+            cover=cover,
+            desc=desc,
             filepath=code.co_filename if code else None,
             lineno=code.co_firstlineno if code else None,
         )

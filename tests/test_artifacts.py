@@ -1,5 +1,6 @@
 import pathlib
 import sys
+import textwrap
 
 import pytest
 from pytest import MonkeyPatch
@@ -19,7 +20,18 @@ def artifact_without_params():
 
 @artifact(sample=True)
 def sample_artifact():
+    """This is an example of doc
+
+    - list0
+    - list1
+    """
     return "sample_artifact"
+
+
+@artifact(desc="MOCK_DESC")
+def artifact_with_desc():
+    """This should be overridden by the doc arg"""
+    return "artifact_with_desc"
 
 
 def test_collect():
@@ -32,6 +44,7 @@ def test_collect():
                 name=artifact_without_params.__name__,
                 func=artifact_without_params,
                 sample=False,
+                cover=False,
                 filepath=artifact_without_params.__code__.co_filename,
                 lineno=artifact_without_params.__code__.co_firstlineno,
             ),
@@ -40,8 +53,20 @@ def test_collect():
                 name=sample_artifact.__name__,
                 func=sample_artifact,
                 sample=True,
+                cover=False,
+                desc=textwrap.dedent("This is an example of doc\n\n- list0\n- list1"),
                 filepath=sample_artifact.__code__.co_filename,
                 lineno=sample_artifact.__code__.co_firstlineno,
+            ),
+            artifact_with_desc.__name__: Artifact(
+                module=__name__,
+                name=artifact_with_desc.__name__,
+                func=artifact_with_desc,
+                sample=False,
+                cover=False,
+                desc="MOCK_DESC",
+                filepath=artifact_with_desc.__code__.co_filename,
+                lineno=artifact_with_desc.__code__.co_firstlineno,
             ),
         }
     }
