@@ -18,7 +18,7 @@ def artifact_without_params():
     return "artifact_without_params"
 
 
-@artifact(sample=True)
+@artifact(sample=True, short_desc="example")
 def sample_artifact():
     """This is an example of doc
 
@@ -55,6 +55,7 @@ def test_collect():
                 sample=True,
                 cover=False,
                 desc=textwrap.dedent("This is an example of doc\n\n- list0\n- list1"),
+                short_desc="example",
                 filepath=sample_artifact.__code__.co_filename,
                 lineno=sample_artifact.__code__.co_firstlineno,
             ),

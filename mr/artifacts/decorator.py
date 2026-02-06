@@ -13,6 +13,7 @@ def artifact(
     sample: bool = False,
     cover: bool = False,
     desc: str | None = None,
+    short_desc: str | None = None,
 ) -> typing.Callable:
     def decorator(wrapped: typing.Callable):
         nonlocal desc
@@ -26,6 +27,7 @@ def artifact(
             sample=sample,
             cover=cover,
             desc=desc,
+            short_desc=short_desc,
             filepath=code.co_filename if code else None,
             lineno=code.co_firstlineno if code else None,
         )

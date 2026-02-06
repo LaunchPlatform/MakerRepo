@@ -10,5 +10,6 @@ class Artifact:
     sample: bool
     cover: bool = False
     desc: str | None = None
+    short_desc: str | None = None
     filepath: str | None = None
     lineno: int | None = None
