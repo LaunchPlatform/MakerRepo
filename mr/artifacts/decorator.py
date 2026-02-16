@@ -14,6 +14,8 @@ def artifact(
     cover: bool = False,
     desc: str | None = None,
     short_desc: str | None = None,
+    export_step: bool | None = None,
+    export_3mf: bool | None = None,
 ) -> typing.Callable:
     def decorator(wrapped: typing.Callable):
         nonlocal desc
@@ -30,6 +32,8 @@ def artifact(
             short_desc=short_desc,
             filepath=code.co_filename if code else None,
             lineno=code.co_firstlineno if code else None,
+            export_step=export_step,
+            export_3mf=export_3mf,
         )
 
         def callback(scanner: venusian.Scanner, name: str, ob: typing.Callable):

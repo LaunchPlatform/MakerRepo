@@ -13,3 +13,5 @@ class Artifact:
     short_desc: str | None = None
     filepath: str | None = None
     lineno: int | None = None
+    export_step: bool | None = None
+    export_3mf: bool | None = None
