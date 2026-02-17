@@ -32,6 +32,7 @@ def test_collect():
                 module=__name__,
                 name=customizable_artifact.__name__,
                 func=customizable_artifact,
+                parameters=SizeParams,
                 filepath=customizable_artifact.__code__.co_filename,
                 lineno=customizable_artifact.__code__.co_firstlineno,
                 desc=textwrap.dedent("This is an example of doc\n\n- list0\n- list1"),

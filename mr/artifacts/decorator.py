@@ -2,6 +2,7 @@ import inspect
 import typing
 
 import venusian
+from pydantic import BaseModel
 
 from .. import constants
 from .data_types import Artifact
@@ -69,11 +70,23 @@ def customizable(
             desc = inspect.getdoc(wrapped)
 
         sig = inspect.signature(wrapped)
+        if len(sig.parameters) != 1:
+            raise ValueError(
+                f"The customizable function should take exactly one argument, but we got {len(sig.parameters)} instead"
+            )
+        key = list(sig.parameters.keys())[0]
+        parameters = sig.parameters[key]
+        if not issubclass(parameters.annotation, BaseModel):
+            raise ValueError(
+                "The customizable function's parameter argument should be a subclass of pydantic.BaseModel, "
+                f"but we got {parameters} instead"
+            )
 
         customizable_obj = Customizable(
             module=wrapped.__module__,
             name=wrapped.__name__,
             func=wrapped,
+            parameters=parameters.annotation,
             desc=desc,
             short_desc=short_desc,
             filepath=code.co_filename if code else None,

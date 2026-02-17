@@ -25,6 +25,7 @@ class Customizable:
     module: str
     name: str
     func: typing.Callable
+    parameters: typing.Type[BaseModel]
     desc: str | None = None
     short_desc: str | None = None
     filepath: str | None = None
