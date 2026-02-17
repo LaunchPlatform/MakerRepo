@@ -1,6 +1,7 @@
 import sys
 import textwrap
 
+import pytest
 from pydantic import BaseModel
 
 from mr import Customizable
@@ -44,3 +45,22 @@ def test_collect():
         customizable_artifact(SizeParams(width=10, height=20))
         == "customizable_artifact"
     )
+
+
+def test_customizable_func_without_arg():
+    err_msg = "The customizable function should take exactly one argument, but we got {} instead"
+    with pytest.raises(ValueError) as exp:
+
+        @customizable
+        def func_without_arg():
+            pass
+
+    assert exp.value.args[0] == err_msg.format(0)
+
+    with pytest.raises(ValueError) as exp:
+
+        @customizable
+        def func_with_too_many_args(params: SizeParams, extra: int = 123):
+            pass
+
+    assert exp.value.args[0] == err_msg.format(2)
