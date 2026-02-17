@@ -64,3 +64,17 @@ def test_customizable_func_without_arg():
             pass
 
     assert exp.value.args[0] == err_msg.format(2)
+
+
+def test_customizable_func_with_wrong_arg_type():
+    err_msg = (
+        "The customizable function's parameter argument should be a subclass of pydantic.BaseModel, "
+        "but we got <class 'int'> instead"
+    )
+    with pytest.raises(ValueError) as exp:
+
+        @customizable
+        def func_with_wrong_arg_type(val: int):
+            pass
+
+    assert exp.value.args[0] == err_msg.format(0)

@@ -79,7 +79,7 @@ def customizable(
         if not issubclass(parameters.annotation, BaseModel):
             raise ValueError(
                 "The customizable function's parameter argument should be a subclass of pydantic.BaseModel, "
-                f"but we got {parameters} instead"
+                f"but we got {parameters.annotation} instead"
             )
 
         customizable_obj = Customizable(
