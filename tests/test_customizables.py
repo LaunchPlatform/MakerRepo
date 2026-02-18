@@ -24,6 +24,14 @@ def customizable_artifact(params: SizeParams):
     return "customizable_artifact"
 
 
+@customizable(
+    short_desc="example_with_sample_params",
+    sample_parameters=SizeParams(width=123, height=456),
+)
+def customizable_with_sample_parameters(params: SizeParams):
+    return "customizable_with_sample_parameters"
+
+
 def test_collect():
     module = sys.modules[__name__]
     registry = collect([module])
@@ -39,11 +47,25 @@ def test_collect():
                 desc=textwrap.dedent("This is an example of doc\n\n- list0\n- list1"),
                 short_desc="example",
             ),
+            customizable_with_sample_parameters.__name__: Customizable(
+                module=__name__,
+                name=customizable_with_sample_parameters.__name__,
+                func=customizable_with_sample_parameters,
+                parameters=SizeParams,
+                sample_parameters=SizeParams(width=123, height=456),
+                filepath=customizable_with_sample_parameters.__code__.co_filename,
+                lineno=customizable_with_sample_parameters.__code__.co_firstlineno,
+                short_desc="example_with_sample_params",
+            ),
         }
     }
     assert (
         customizable_artifact(SizeParams(width=10, height=20))
         == "customizable_artifact"
+    )
+    assert (
+        customizable_with_sample_parameters(SizeParams(width=10, height=20))
+        == "customizable_with_sample_parameters"
     )
 
 

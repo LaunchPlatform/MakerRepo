@@ -62,6 +62,7 @@ def customizable(
     *,
     desc: str | None = None,
     short_desc: str | None = None,
+    sample_parameters: BaseModel | None = None,
 ) -> typing.Callable:
     def decorator(wrapped: typing.Callable):
         nonlocal desc
@@ -87,6 +88,7 @@ def customizable(
             name=wrapped.__name__,
             func=wrapped,
             parameters=parameters.annotation,
+            sample_parameters=sample_parameters,
             desc=desc,
             short_desc=short_desc,
             filepath=code.co_filename if code else None,
