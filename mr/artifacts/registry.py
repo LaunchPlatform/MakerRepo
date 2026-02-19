@@ -39,6 +39,11 @@ def collect(packages: list[typing.Any], registry: Registry | None = None) -> Reg
         registry = Registry()
     scanner = venusian.Scanner(registry=registry)
     for package in packages:
-        scanner.scan(package, categories=(constants.MR_ARTIFACTS_CATEGORY,))
-        scanner.scan(package, categories=(constants.MR_CUSTOMIZABLE_CATEGORY,))
+        scanner.scan(
+            package,
+            categories=(
+                constants.MR_ARTIFACTS_CATEGORY,
+                constants.MR_CUSTOMIZABLE_CATEGORY,
+            ),
+        )
     return registry
