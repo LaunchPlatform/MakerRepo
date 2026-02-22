@@ -25,7 +25,7 @@ class Customizable:
     module: str
     name: str
     func: typing.Callable
-    parameters: typing.Type[BaseModel]
+    parameters_schema: typing.Type[BaseModel]
     sample_parameters: BaseModel | None = None
     desc: str | None = None
     short_desc: str | None = None

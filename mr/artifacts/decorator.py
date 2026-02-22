@@ -87,7 +87,7 @@ def customizable(
             module=wrapped.__module__,
             name=wrapped.__name__,
             func=wrapped,
-            parameters=parameters.annotation,
+            parameters_schema=parameters.annotation,
             sample_parameters=sample_parameters,
             desc=desc,
             short_desc=short_desc,
