@@ -25,32 +25,25 @@ def test_generator_validation_error_multiple_messages():
     assert err.fields == []
 
 
-def test_generator_validation_error_fields_as_tuples():
-    """Field errors passed as (path, message) are normalized to FieldError."""
-    err = GeneratorValidationError(
-        "Too many parts",
-        "Invalid angle range",
-        fields=[
-            [
-                ("window", "size", "width"),
-                "Width must be an integer greater than 10",
-            ],
-            [
-                ("window", "size", "height"),
-                "Height must be an integer instead of an float",
-            ],
-        ],
-    )
-    assert err.messages == ("Too many parts", "Invalid angle range")
-    assert len(err.fields) == 2
-    assert err.fields[0] == FieldError(
+def test_generator_validation_error_fields_require_field_error():
+    """Field errors must be FieldError instances, not raw tuples."""
+    fe1 = FieldError(
         ("window", "size", "width"),
         "Width must be an integer greater than 10",
     )
-    assert err.fields[1] == FieldError(
+    fe2 = FieldError(
         ("window", "size", "height"),
         "Height must be an integer instead of an float",
     )
+    err = GeneratorValidationError(
+        "Too many parts",
+        "Invalid angle range",
+        fields=[fe1, fe2],
+    )
+    assert err.messages == ("Too many parts", "Invalid angle range")
+    assert len(err.fields) == 2
+    assert err.fields[0] == fe1
+    assert err.fields[1] == fe2
     assert "window.size.width" in str(err)
     assert "window.size.height" in str(err)
 
@@ -76,13 +69,11 @@ def test_generator_validation_error_fields_as_field_error():
 
 def test_generator_validation_error_no_messages_with_fields():
     """Can have only field errors, no general messages."""
-    err = GeneratorValidationError(
-        fields=[
-            (("x",), "Must be positive"),
-        ],
-    )
+    fe = FieldError(("x",), "Must be positive")
+    err = GeneratorValidationError(fields=[fe])
     assert err.messages == ()
     assert len(err.fields) == 1
+    assert err.fields[0] is fe
     assert err.fields[0].path == ("x",)
     assert err.fields[0].message == "Must be positive"
     assert "Field errors" in str(err)

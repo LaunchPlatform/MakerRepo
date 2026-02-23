@@ -1,5 +1,4 @@
 import dataclasses
-from typing import Union
 
 
 @dataclasses.dataclass(frozen=True, slots=True)
@@ -19,35 +18,21 @@ class FieldError:
         return cls(tuple(d["path"]), d["message"])
 
 
-FieldErrorItem = Union[FieldError, tuple[tuple[str, ...], str]]
-
-
-def _normalize_field_error(item: FieldErrorItem) -> FieldError:
-    if isinstance(item, FieldError):
-        return item
-    path, message = item
-    return FieldError(tuple(path), message)
-
-
 class GeneratorValidationError(ValueError):
     """Error for generator input data validation failures.
 
     Accepts one or more general error messages and optionally a list of
-    field-level errors (path + message). Field errors can be passed as
-    FieldError instances or as (path_tuple, message) pairs; they are
-    stored as FieldError instances on the .fields attribute.
+    field-level FieldError instances.
     """
 
     def __init__(
         self,
         *messages: str,
-        fields: list[FieldErrorItem] | None = None,
+        fields: list[FieldError] | None = None,
     ):
         super().__init__(messages[0] if messages else "")
         self.messages: tuple[str, ...] = messages
-        self.fields: list[FieldError] = (
-            [_normalize_field_error(item) for item in fields] if fields else []
-        )
+        self.fields: list[FieldError] = list(fields) if fields else []
 
     def __str__(self) -> str:
         parts: list[str] = []
