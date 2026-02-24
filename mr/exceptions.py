@@ -32,6 +32,12 @@ class GeneratorValidationError(ValueError):
     ):
         super().__init__(messages[0] if messages else "")
         self.messages: tuple[str, ...] = messages
+        if fields:
+            for field in fields:
+                if not isinstance(field, FieldError):
+                    raise TypeError(
+                        f"Field error must be a FieldError instance, got {type(field)}"
+                    )
         self.fields: list[FieldError] = list(fields) if fields else []
 
     def __str__(self) -> str:

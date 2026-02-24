@@ -176,6 +176,30 @@ def test_generator_validation_error_json_roundtrip():
     assert restored.fields[0].message == "Bad value"
 
 
+@pytest.mark.parametrize(
+    "bad_field",
+    [
+        ("window.size.width", "not a FieldError"),
+        {"path": ["x"], "message": "dict, not FieldError"},
+        "a plain string",
+        42,
+        None,
+    ],
+    ids=["tuple", "dict", "str", "int", "None"],
+)
+def test_generator_validation_error_rejects_non_field_error(bad_field):
+    """fields list items that are not FieldError instances raise TypeError."""
+    with pytest.raises(TypeError, match="Field error must be a FieldError instance"):
+        GeneratorValidationError("msg", fields=[bad_field])
+
+
+def test_generator_validation_error_rejects_mixed_field_errors():
+    """TypeError is raised even when valid FieldErrors precede the bad item."""
+    fe = FieldError(("a",), "ok")
+    with pytest.raises(TypeError, match="Field error must be a FieldError instance"):
+        GeneratorValidationError("msg", fields=[fe, "not a FieldError"])
+
+
 def test_generator_validation_error_from_value_error():
     """from_value_error builds GeneratorValidationError with ValueError message."""
     ve = ValueError("Invalid input")
