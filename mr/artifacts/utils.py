@@ -30,12 +30,14 @@ def load_module(module_spec: str) -> ModuleType:
 def find_python_packages(path: pathlib.Path) -> list[str]:
     """
     Find top-level Python packages (directories with __init__.py) in the given path,
-    excluding common test package names.
+    excluding dot-prefixed dirs (e.g. .venv), and common test package names.
     """
     packages = []
 
     for item in path.iterdir():
         if not item.is_dir():
+            continue
+        if item.name.startswith("."):
             continue
         if item.name.lower().startswith("test"):
             continue

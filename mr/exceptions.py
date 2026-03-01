@@ -5,7 +5,7 @@ import dataclasses
 class FieldError:
     """A validation error at a specific JSON path."""
 
-    path: tuple[str, ...]
+    path: tuple[str | int, ...]
     message: str
 
     def to_dict(self) -> dict:

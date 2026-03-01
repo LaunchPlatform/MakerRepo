@@ -163,6 +163,28 @@ def test_find_python_packages(
 
 
 @pytest.mark.parametrize(
+    "dir_names,expected_packages",
+    [
+        (["mypkg", ".venv", ".foo"], ["mypkg"]),
+        (["mypkg", ".venv"], ["mypkg"]),
+        ([".venv", ".foo"], []),
+        (["mypkg"], ["mypkg"]),
+    ],
+)
+def test_find_python_packages_ignores_dot_prefix(
+    tmp_path: pathlib.Path,
+    dir_names: list[str],
+    expected_packages: list[str],
+):
+    """Dot-prefixed dirs (e.g. .venv) are ignored even if they have __init__.py."""
+    for name in dir_names:
+        (tmp_path / name).mkdir()
+        (tmp_path / name / "__init__.py").touch()
+    packages = find_python_packages(tmp_path)
+    assert set(packages) == set(expected_packages)
+
+
+@pytest.mark.parametrize(
     "subdir,expected_modules",
     [
         ("examples", ["main"]),
