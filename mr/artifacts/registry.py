@@ -34,7 +34,11 @@ class Registry:
         module_customizables[customizable.name] = customizable
 
 
-def collect(packages: list[typing.Any], registry: Registry | None = None) -> Registry:
+def collect(
+    packages: list[typing.Any],
+    registry: Registry | None = None,
+    onerror: typing.Callable[[str], None] | None = None,
+) -> Registry:
     if registry is None:
         registry = Registry()
     scanner = venusian.Scanner(registry=registry)
@@ -45,5 +49,6 @@ def collect(packages: list[typing.Any], registry: Registry | None = None) -> Reg
                 constants.MR_ARTIFACTS_CATEGORY,
                 constants.MR_CUSTOMIZABLE_CATEGORY,
             ),
+            onerror=onerror,
         )
     return registry
