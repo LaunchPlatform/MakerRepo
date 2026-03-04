@@ -35,7 +35,7 @@ class Registry:
             )
         module_customizables[customizable.name] = customizable
 
-    def add_cache(self, cache: Cached):
+    def add_cached(self, cache: Cached):
         module_caches = self.caches[cache.module]
         if cache.name in module_caches:
             raise KeyError(f"cache {cache.name} already exists in {cache.module}")

@@ -40,31 +40,34 @@ def test_collect_cached():
             cached_without_params.__name__: Cached(
                 module=__name__,
                 name=cached_without_params.__name__,
-                func=cached_without_params,
+                func=cached_without_params.__wrapped__,
                 desc=textwrap.dedent(
                     "This is a cached function doc\n\n- list0\n- list1"
                 ),
-                filepath=cached_without_params.__code__.co_filename,
-                lineno=cached_without_params.__code__.co_firstlineno,
+                filepath=cached_without_params.__wrapped__.__code__.co_filename,
+                lineno=cached_without_params.__wrapped__.__code__.co_firstlineno,
+                lookup_funcs=[],
             ),
             cached_with_short_desc.__name__: Cached(
                 module=__name__,
                 name=cached_with_short_desc.__name__,
-                func=cached_with_short_desc,
+                func=cached_with_short_desc.__wrapped__,
                 desc=textwrap.dedent(
                     "This is an example of cached doc\n\n- list0\n- list1"
                 ),
                 short_desc="example_cached",
-                filepath=cached_with_short_desc.__code__.co_filename,
-                lineno=cached_with_short_desc.__code__.co_firstlineno,
+                filepath=cached_with_short_desc.__wrapped__.__code__.co_filename,
+                lineno=cached_with_short_desc.__wrapped__.__code__.co_firstlineno,
+                lookup_funcs=[],
             ),
             cached_with_desc.__name__: Cached(
                 module=__name__,
                 name=cached_with_desc.__name__,
-                func=cached_with_desc,
+                func=cached_with_desc.__wrapped__,
                 desc="OVERRIDDEN_DESC",
-                filepath=cached_with_desc.__code__.co_filename,
-                lineno=cached_with_desc.__code__.co_firstlineno,
+                filepath=cached_with_desc.__wrapped__.__code__.co_filename,
+                lineno=cached_with_desc.__wrapped__.__code__.co_firstlineno,
+                lookup_funcs=[],
             ),
         }
     }

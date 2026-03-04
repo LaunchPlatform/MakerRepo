@@ -1,3 +1,4 @@
+import functools
 import inspect
 import typing
 
@@ -137,18 +138,26 @@ def cached(
             lineno=code.co_firstlineno if code else None,
         )
 
+        @functools.wraps(wrapped)
+        def wrapper(*args, **kwargs):
+            for lookup_func in cached_obj.lookup_funcs:
+                res = lookup_func(*args, **kwargs)
+                if res is not None:
+                    return res
+            return cached_obj.func(*args, **kwargs)
+
         def callback(scanner: venusian.Scanner, name: str, ob: typing.Callable):
             if cached_obj.name != name:
                 raise ValueError("Name is not the same")
-            scanner.registry.add_cache(cached_obj)
+            scanner.registry.add_cached(cached_obj)
 
         venusian.attach(
-            wrapped,
+            wrapper,
             callback,
             category=constants.MR_CACHE_CATEGORY,
             depth=1 if func is None else 2,
         )
-        return wrapped
+        return wrapper
 
     if func is not None:
         return decorator(func)
