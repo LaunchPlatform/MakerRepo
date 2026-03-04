@@ -1,5 +1,8 @@
 import sys
 import textwrap
+import typing
+
+import pytest
 
 from mr import Cached
 from mr import cached
@@ -27,9 +30,9 @@ def cached_with_short_desc():
 
 
 @cached(desc="OVERRIDDEN_DESC")
-def cached_with_desc():
+def cached_with_desc(arg0: int, karg0: str):
     """This should be overridden by the desc arg"""
-    return "cached_with_desc"
+    return f"cached_with_desc:{arg0}:{karg0}"
 
 
 def test_collect_cached():
@@ -73,4 +76,71 @@ def test_collect_cached():
     }
     assert cached_without_params() == "cached_without_params"
     assert cached_with_short_desc() == "cached_with_short_desc"
-    assert cached_with_desc() == "cached_with_desc"
+    assert cached_with_desc(123, "abc") == "cached_with_desc:123:abc"
+
+
+@pytest.mark.parametrize(
+    "func_name, lookup_funcs, args, kwargs, expected_value",
+    [
+        ("cached_without_params", [], tuple(), {}, "cached_without_params"),
+        (
+            "cached_without_params",
+            [lambda: "cached_val00"],
+            tuple(),
+            {},
+            "cached_val00",
+        ),
+        (
+            "cached_with_short_desc",
+            [lambda: "cached_val01"],
+            tuple(),
+            {},
+            "cached_val01",
+        ),
+        (
+            "cached_with_desc",
+            [lambda arg0, karg0: "cached_val02"],
+            (123,),
+            {"karg0": "abc"},
+            "cached_val02",
+        ),
+        (
+            "cached_with_desc",
+            [
+                lambda arg0, karg0: (
+                    "cached_val02" if arg0 == 123 and karg0 == "abc" else None
+                )
+            ],
+            (456,),
+            {"karg0": "xyz"},
+            "cached_with_desc:456:xyz",
+        ),
+        (
+            "cached_with_desc",
+            [
+                lambda arg0, karg0: (
+                    "cached_val02" if arg0 == 123 and karg0 == "abc" else None
+                )
+            ],
+            (123,),
+            {"karg0": "abc"},
+            "cached_val02",
+        ),
+    ],
+)
+def test_lookup_funcs(
+    func_name: str,
+    lookup_funcs: list[typing.Callable],
+    args: tuple,
+    kwargs: dict,
+    expected_value: typing.Any,
+):
+    module = sys.modules[__name__]
+    registry = collect([module])
+
+    cached_obj = registry.caches[__name__][func_name]
+    cached_obj.lookup_funcs.clear()
+    cached_obj.lookup_funcs.extend(lookup_funcs)
+
+    func = globals()[func_name]
+    assert func(*args, **kwargs) == expected_value
