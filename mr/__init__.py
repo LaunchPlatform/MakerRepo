@@ -1,17 +1,17 @@
+from .data_types import Artifact
+from .data_types import Cached
+from .data_types import Customizable
+from .decorator import artifact
+from .decorator import cached
+from .decorator import customizable
 from .exceptions import FieldError
 from .exceptions import GeneratorValidationError
-from mr.data_types import Artifact
-from mr.data_types import Cached
-from mr.data_types import Customizable
-from mr.decorator import artifact
-from mr.decorator import cache
-from mr.decorator import customizable
 
 __all__ = [
     "Artifact",
     "artifact",
     "Cached",
-    "cache",
+    "cached",
     "Customizable",
     "customizable",
     "FieldError",

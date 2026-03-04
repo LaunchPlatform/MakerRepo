@@ -1,6 +1,7 @@
 from build123d import *
 
 from mr import artifact
+from mr import cached
 
 
 class ExampleBox(BasePartObject):
@@ -25,3 +26,9 @@ class ExampleBox(BasePartObject):
 def main():
     box = ExampleBox()
     return box
+
+
+@cached(short_desc="example_cached_box")
+def cached_box():
+    """Return a cached ExampleBox instance."""
+    return ExampleBox()
