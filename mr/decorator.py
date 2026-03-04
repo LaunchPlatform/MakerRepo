@@ -6,6 +6,7 @@ from pydantic import BaseModel
 
 from . import constants
 from .data_types import Artifact
+from .data_types import Cached
 from .data_types import Customizable
 
 
@@ -104,6 +105,47 @@ def customizable(
             wrapped,
             callback,
             category=constants.MR_CUSTOMIZABLE_CATEGORY,
+            depth=1 if func is None else 2,
+        )
+        return wrapped
+
+    if func is not None:
+        return decorator(func)
+
+    return decorator
+
+
+def cached(
+    func: typing.Callable | None = None,
+    *,
+    desc: str | None = None,
+    short_desc: str | None = None,
+) -> typing.Callable:
+    def decorator(wrapped: typing.Callable):
+        nonlocal desc
+        code = getattr(wrapped, "__code__", None)
+        if desc is None:
+            desc = inspect.getdoc(wrapped)
+
+        cached_obj = Cached(
+            module=wrapped.__module__,
+            name=wrapped.__name__,
+            func=wrapped,
+            desc=desc,
+            short_desc=short_desc,
+            filepath=code.co_filename if code else None,
+            lineno=code.co_firstlineno if code else None,
+        )
+
+        def callback(scanner: venusian.Scanner, name: str, ob: typing.Callable):
+            if cached_obj.name != name:
+                raise ValueError("Name is not the same")
+            scanner.registry.add_cache(cached_obj)
+
+        venusian.attach(
+            wrapped,
+            callback,
+            category=constants.MR_CACHE_CATEGORY,
             depth=1 if func is None else 2,
         )
         return wrapped

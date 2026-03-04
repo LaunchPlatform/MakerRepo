@@ -33,6 +33,17 @@ class Customizable:
     lineno: int | None = None
 
 
+@dataclasses.dataclass(frozen=True)
+class Cached:
+    module: str
+    name: str
+    func: typing.Callable
+    desc: str | None = None
+    short_desc: str | None = None
+    filepath: str | None = None
+    lineno: int | None = None
+
+
 class DefaultArtifactConfig(BaseModel):
     """Defaults used when the artifact decorator omits export_step or export_3mf."""
 

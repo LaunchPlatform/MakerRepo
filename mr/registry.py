@@ -7,6 +7,7 @@ import venusian
 from . import constants
 from . import Customizable
 from .data_types import Artifact
+from .data_types import Cached
 
 
 class Registry:
@@ -16,6 +17,7 @@ class Registry:
         self.customizables: dict[str, dict[str, Customizable]] = (
             collections.defaultdict(dict)
         )
+        self.caches: dict[str, dict[str, Cached]] = collections.defaultdict(dict)
 
     def add_artifact(self, artifact: Artifact):
         module_artifacts = self.artifacts[artifact.module]
@@ -33,6 +35,12 @@ class Registry:
             )
         module_customizables[customizable.name] = customizable
 
+    def add_cache(self, cache: Cached):
+        module_caches = self.caches[cache.module]
+        if cache.name in module_caches:
+            raise KeyError(f"cache {cache.name} already exists in {cache.module}")
+        module_caches[cache.name] = cache
+
 
 def collect(
     packages: list[typing.Any],
@@ -48,6 +56,7 @@ def collect(
             categories=(
                 constants.MR_ARTIFACTS_CATEGORY,
                 constants.MR_CUSTOMIZABLE_CATEGORY,
+                constants.MR_CACHE_CATEGORY,
             ),
             onerror=onerror,
         )
