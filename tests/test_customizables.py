@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 from mr import Customizable
 from mr import customizable
-from mr.artifacts.registry import collect
+from mr.registry import collect
 
 
 class SizeParams(BaseModel):

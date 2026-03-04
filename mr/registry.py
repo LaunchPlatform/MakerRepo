@@ -4,8 +4,8 @@ import typing
 
 import venusian
 
-from .. import constants
-from .. import Customizable
+from . import constants
+from . import Customizable
 from .data_types import Artifact
 
 

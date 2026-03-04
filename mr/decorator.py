@@ -4,7 +4,7 @@ import typing
 import venusian
 from pydantic import BaseModel
 
-from .. import constants
+from . import constants
 from .data_types import Artifact
 from .data_types import Customizable
 

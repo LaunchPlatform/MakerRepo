@@ -3,11 +3,11 @@ import pathlib
 import pytest
 
 from mr import Artifact
-from mr.artifacts.data_types import ArtifactsConfig
-from mr.artifacts.data_types import DefaultArtifactConfig
-from mr.artifacts.data_types import RepoConfig
-from mr.artifacts.utils import apply_repo_config
-from mr.artifacts.utils import load_repo_config
+from mr.data_types import ArtifactsConfig
+from mr.data_types import DefaultArtifactConfig
+from mr.data_types import RepoConfig
+from mr.utils import apply_repo_config
+from mr.utils import load_repo_config
 
 
 def test_load_repo_config_missing_file_returns_default(

@@ -8,7 +8,7 @@ from types import ModuleType
 
 import yaml
 
-from ..constants import REPO_CONFIG_PATH
+from .constants import REPO_CONFIG_PATH
 from .data_types import Artifact
 from .data_types import DefaultArtifactConfig
 from .data_types import RepoConfig

@@ -7,10 +7,10 @@ from pytest import MonkeyPatch
 
 from mr import Artifact
 from mr import artifact
-from mr.artifacts.registry import collect
-from mr.artifacts.utils import find_python_modules
-from mr.artifacts.utils import find_python_packages
-from mr.artifacts.utils import load_module
+from mr.registry import collect
+from mr.utils import find_python_modules
+from mr.utils import find_python_packages
+from mr.utils import load_module
 
 
 @artifact
