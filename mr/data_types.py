@@ -43,6 +43,7 @@ class Cached:
     filepath: str | None = None
     lineno: int | None = None
     lookup_funcs: list[typing.Callable] = dataclasses.field(default_factory=list)
+    store_funcs: list[typing.Callable] = dataclasses.field(default_factory=list)
 
 
 class DefaultArtifactConfig(BaseModel):

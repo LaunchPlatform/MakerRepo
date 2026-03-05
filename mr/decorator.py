@@ -144,7 +144,11 @@ def cached(
                 res = lookup_func(*args, **kwargs)
                 if res is not None:
                     return res
-            return cached_obj.func(*args, **kwargs)
+            result = cached_obj.func(*args, **kwargs)
+            for store_func in cached_obj.store_funcs:
+                if store_func(result):
+                    return result
+            return result
 
         def callback(scanner: venusian.Scanner, name: str, ob: typing.Callable):
             if cached_obj.name != name:
