@@ -201,6 +201,7 @@ def test_store_funcs(
     registry = collect([module])
 
     cached_obj = registry.caches[__name__][func_name]
+    cached_obj.lookup_funcs.clear()
     cached_obj.store_funcs.clear()
     cached_obj.store_funcs.extend(store_funcs)
 
@@ -213,6 +214,7 @@ def test_store_funcs_receive_result():
     module = sys.modules[__name__]
     registry = collect([module])
     cached_obj = registry.caches[__name__]["cached_with_desc"]
+    cached_obj.lookup_funcs.clear()
     cached_obj.store_funcs.clear()
 
     received: list[typing.Any] = []
