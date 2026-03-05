@@ -141,12 +141,12 @@ def cached(
         @functools.wraps(wrapped)
         def wrapper(*args, **kwargs):
             for lookup_func in cached_obj.lookup_funcs:
-                res = lookup_func(*args, **kwargs)
+                res = lookup_func(args, kwargs)
                 if res is not None:
                     return res
             result = cached_obj.func(*args, **kwargs)
             for store_func in cached_obj.store_funcs:
-                if store_func(result):
+                if store_func(args, kwargs, result):
                     return result
             return result
 

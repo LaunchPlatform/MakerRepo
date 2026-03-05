@@ -88,21 +88,21 @@ def test_collect_cached():
         ("cached_without_params", [], tuple(), {}, "cached_without_params"),
         (
             "cached_without_params",
-            [lambda: "cached_val00"],
+            [lambda args, kwargs: "cached_val00"],
             tuple(),
             {},
             "cached_val00",
         ),
         (
             "cached_with_short_desc",
-            [lambda: "cached_val01"],
+            [lambda args, kwargs: "cached_val01"],
             tuple(),
             {},
             "cached_val01",
         ),
         (
             "cached_with_desc",
-            [lambda arg0, karg0: "cached_val02"],
+            [lambda args, kwargs: "cached_val02"],
             (123,),
             {"karg0": "abc"},
             "cached_val02",
@@ -110,8 +110,10 @@ def test_collect_cached():
         (
             "cached_with_desc",
             [
-                lambda arg0, karg0: (
-                    "cached_val02" if arg0 == 123 and karg0 == "abc" else None
+                lambda args, kwargs: (
+                    "cached_val02"
+                    if args[0] == 123 and kwargs["karg0"] == "abc"
+                    else None
                 )
             ],
             (456,),
@@ -121,8 +123,10 @@ def test_collect_cached():
         (
             "cached_with_desc",
             [
-                lambda arg0, karg0: (
-                    "cached_val02" if arg0 == 123 and karg0 == "abc" else None
+                lambda args, kwargs: (
+                    "cached_val02"
+                    if args[0] == 123 and kwargs["karg0"] == "abc"
+                    else None
                 )
             ],
             (123,),
@@ -155,28 +159,28 @@ def test_lookup_funcs(
         ("cached_without_params", [], tuple(), {}, "cached_without_params"),
         (
             "cached_without_params",
-            [lambda result: False],
+            [lambda args, kwargs, result: False],
             tuple(),
             {},
             "cached_without_params",
         ),
         (
             "cached_without_params",
-            [lambda result: True],
+            [lambda args, kwargs, result: True],
             tuple(),
             {},
             "cached_without_params",
         ),
         (
             "cached_with_short_desc",
-            [lambda result: result == "cached_with_short_desc"],
+            [lambda args, kwargs, result: result == "cached_with_short_desc"],
             tuple(),
             {},
             "cached_with_short_desc",
         ),
         (
             "cached_with_desc",
-            [lambda result: False, lambda result: True],
+            [lambda args, kwargs, result: False, lambda args, kwargs, result: True],
             (123,),
             {"karg0": "abc"},
             "cached_with_desc:123:abc",
@@ -218,7 +222,9 @@ def test_store_funcs_receive_result():
     cached_obj.store_funcs.clear()
 
     received: list[typing.Any] = []
-    cached_obj.store_funcs.append(lambda result: received.append(result) or False)
+    cached_obj.store_funcs.append(
+        lambda args, kwargs, result: received.append(result) or False
+    )
 
     func = globals()["cached_with_desc"]
     out = func(123, "abc")
