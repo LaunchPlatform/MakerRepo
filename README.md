@@ -1,12 +1,21 @@
 # MakerRepo
 
-**MakerRepo** is an open-source Python library that brings the [Manufacturing as Code](https://docs.makerrepo.com/) concept into the [Build123D](https://github.com/gumyr/build123d) ecosystem. It is designed to have **as little impact on your existing Build123D project as possible** — add a dependency and a few decorators; your models and workflow stay the same.
+**MakerRepo** is an open-source Python library that brings the [Manufacturing as Code](https://docs.makerrepo.com/) concept into the [Build123D](https://github.com/gumyr/build123d) ecosystem.
+It is designed to have **as little impact on your existing Build123D project as possible** — add a dependency and a few decorators; your models and workflow stay the same.
+
+The makerrepo Python package (imported as `mr`) is a lightweight library that provides decorators such as `@artifact`, `@customizable`, and `@cached` to annotate functions that build your models.
+The decorators have no effect on your existing Build123D code until it is discovered and run by tools such as [makerrepo-cli](https://github.com/LaunchPlatform/makerrepo-cli) or MakerRepo.com CI.
+The goal is to enable a code-driven workflow locally (e.g. command-line tools) or in CI.
+The library does not assume how it will be consumed, so annotated functions can be used with other tools and frameworks as well.
+It brings Manufacturing as Code into the Build123D ecosystem.
 
 ## What is MakerRepo?
 
-[MakerRepo](https://makerrepo.com/) is a GitHub-like platform for manufacturing as code. You write Python code to define 3D models with Build123D, push to a Git repository on MakerRepo, and the platform builds your models and hosts the resulting CAD artifacts so you can view and share them.
+[MakerRepo](https://makerrepo.com/) is a GitHub-like platform for manufacturing as code.
+You write Python code to define 3D models with Build123D, push to a Git repository on MakerRepo, and the platform builds your models and hosts the resulting CAD artifacts so you can view and share them.
 
-This repository is the **MakerRepo Library** — the `mr` package you add to your project to expose Build123D artifacts to MakerRepo.com (e.g. via the `@artifact` decorator). The platform’s CI then discovers, builds, and publishes those artifacts.
+This repository is the **MakerRepo Library** — the `mr` package you add to your project to expose Build123D artifacts to MakerRepo.com (e.g. via the `@artifact` decorator).
+The platform’s CI then discovers, builds, and publishes those artifacts.
 
 ## Features
 
