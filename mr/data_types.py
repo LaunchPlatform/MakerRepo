@@ -49,7 +49,7 @@ class Cached:
 @dataclasses.dataclass(frozen=True)
 class Result:
     model: typing.Any
-    versioned: typing.Any
+    versioned: typing.Any = None
 
 
 class DefaultArtifactConfig(BaseModel):
