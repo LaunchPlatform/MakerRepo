@@ -1,6 +1,7 @@
 from .data_types import Artifact
 from .data_types import Cached
 from .data_types import Customizable
+from .data_types import Result
 from .decorator import artifact
 from .decorator import cached
 from .decorator import customizable
@@ -16,4 +17,5 @@ __all__ = [
     "customizable",
     "FieldError",
     "GeneratorValidationError",
+    "Result",
 ]
