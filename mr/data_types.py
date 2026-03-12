@@ -46,6 +46,12 @@ class Cached:
     store_funcs: list[typing.Callable] = dataclasses.field(default_factory=list)
 
 
+@dataclasses.dataclass(frozen=True)
+class Result:
+    model: typing.Any
+    versioned: typing.Any
+
+
 class DefaultArtifactConfig(BaseModel):
     """Defaults used when the artifact decorator omits export_step or export_3mf."""
 
