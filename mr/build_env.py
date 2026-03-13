@@ -92,8 +92,9 @@ class BuildEnvVars(enum.Enum):
     MR_REPOSITORY_USERNAME = "MR_REPOSITORY_USERNAME"
     # the full git url of the repository
     MR_REPOSITORY_URL = "MR_REPOSITORY_URL"
-    # set to 1, true, or yes to disable versioned model build
-    MR_VERSIONED_MODEL_DISABLED = "MR_VERSIONED_MODEL_DISABLED"
+    # set to 0, false, or no to disable versioned model build
+    # default behavior is enabled when unset
+    MR_VERSIONED_MODEL_ENABLED = "MR_VERSIONED_MODEL_ENABLED"
 
 
 def _env_bool(value: str | None) -> bool:
@@ -108,7 +109,7 @@ class BuildEnv:
     build_id: str | None = None
     build_number: int | None = None
     build_version: str | None = None
-    versioned_model_disabled: bool = False
+    versioned_model_enabled: bool = True
     git_commit: str | None = None
     git_ref: str | None = None
     git_ref_name: str | None = None
@@ -147,12 +148,17 @@ class BuildEnv:
 
     @classmethod
     def from_env(cls) -> Self:
+        versioned_model_enabled_raw = os.getenv(
+            BuildEnvVars.MR_VERSIONED_MODEL_ENABLED.value
+        )
         return cls(
             build_id=os.getenv(BuildEnvVars.MR_BUILD_ID.value),
             build_number=os.getenv(BuildEnvVars.MR_BUILD_NUMBER.value),
             build_version=os.getenv(BuildEnvVars.MR_BUILD_VERSION.value),
-            versioned_model_disabled=_env_bool(
-                os.getenv(BuildEnvVars.MR_VERSIONED_MODEL_DISABLED.value)
+            versioned_model_enabled=(
+                True
+                if versioned_model_enabled_raw is None
+                else _env_bool(versioned_model_enabled_raw)
             ),
             git_commit=os.getenv(BuildEnvVars.MR_GIT_COMMIT.value),
             git_ref=os.getenv(BuildEnvVars.MR_GIT_REF.value),
