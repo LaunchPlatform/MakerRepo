@@ -138,3 +138,36 @@ class CIEnv:
             if env.repository_name is None and name:
                 replacements["repository_name"] = name
         return dataclasses.replace(env, **replacements)
+
+
+def get_default_version(
+    env: CIEnv | None = None,
+    commit_hash_length: int | None = 4,
+) -> str:
+    """Get the default version string for the current build, which is sensible enough for most cases.
+
+    Precedence order:
+    1. If the current git reference is a tag, return the tag name.
+    2. If the build number is set, return the build number.
+    3. If the git commit is set, return the first ``commit_hash_length``
+       characters of the commit hash (default 4). If ``commit_hash_length``
+       is None, use the full hash.
+    4. Return "unknown".
+
+    :param env: CI environment; if None, obtained from the local git repo.
+    :param commit_hash_length: Number of leading commit-hash characters to use
+        when falling back to commit (step 3). None means use the full hash.
+        Default is 4.
+    :return: The default version string.
+    """
+    if env is None:
+        env = CIEnv.from_local_git_repo()
+    if env.git_ref and env.git_ref.startswith("refs/tags/") and env.git_ref_name:
+        return env.git_ref_name
+    if env.build_number is not None:
+        return str(env.build_number)
+    if env.git_commit is not None:
+        if commit_hash_length is None:
+            return env.git_commit
+        return env.git_commit[:commit_hash_length]
+    return "unknown"

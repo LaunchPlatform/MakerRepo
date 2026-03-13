@@ -6,6 +6,7 @@ import pytest
 from mr.ci import _parse_makerrepo_url
 from mr.ci import CIEnv
 from mr.ci import CIEnvVars
+from mr.ci import get_default_version
 
 
 def _run_git(cwd: pathlib.Path, *args: str) -> None:
@@ -194,3 +195,65 @@ def test_parse_makerrepo_url(url: str, expected_username: str, expected_name: st
 def test_parse_makerrepo_url_unknown_format_returns_none():
     """URLs with no user/repo-like path segment return (None, None)."""
     assert _parse_makerrepo_url("https://example.com") == (None, None)
+
+
+# --- get_default_version ---
+
+
+@pytest.mark.parametrize(
+    "env,expected",
+    [
+        pytest.param(
+            CIEnv(git_ref="refs/tags/v2.0.0", git_ref_name="v2.0.0"),
+            "v2.0.0",
+            id="tag_returns_tag_name",
+        ),
+        pytest.param(
+            CIEnv(
+                git_ref="refs/tags/v3.0.0",
+                git_ref_name="v3.0.0",
+                build_number=999,
+            ),
+            "v3.0.0",
+            id="tag_takes_precedence_over_build_number",
+        ),
+        pytest.param(CIEnv(build_number=123), "123", id="build_number_when_no_tag"),
+        pytest.param(
+            CIEnv(git_commit="a1b2c3d4e5f6"),
+            "a1b2",
+            id="commit_short_when_no_tag_or_build_number",
+        ),
+        pytest.param(CIEnv(), "unknown", id="unknown_when_all_none"),
+        pytest.param(
+            CIEnv(
+                git_ref="refs/heads/main",
+                git_ref_name="main",
+                git_commit="abc123456789",
+            ),
+            "abc1",
+            id="branch_uses_commit_not_branch_name",
+        ),
+    ],
+)
+def test_get_default_version(env: CIEnv, expected: str):
+    """get_default_version returns expected string for given CIEnv."""
+    assert get_default_version(env=env) == expected
+
+
+@pytest.mark.parametrize(
+    "commit_hash_length,expected",
+    [
+        pytest.param(4, "a1b2", id="default_4_chars"),
+        pytest.param(8, "a1b2c3d4", id="8_chars"),
+        pytest.param(1, "a", id="1_char"),
+        pytest.param(None, "a1b2c3d4e5f6", id="full_hash"),
+    ],
+)
+def test_get_default_version_commit_hash_length(
+    commit_hash_length: int | None, expected: str
+):
+    """commit_hash_length controls how many leading commit-hash characters are used."""
+    env = CIEnv(git_commit="a1b2c3d4e5f6")
+    assert (
+        get_default_version(env=env, commit_hash_length=commit_hash_length) == expected
+    )
