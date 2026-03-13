@@ -3,10 +3,10 @@ import subprocess
 
 import pytest
 
-from mr.ci import _parse_makerrepo_url
-from mr.ci import CIEnv
-from mr.ci import CIEnvVars
-from mr.ci import get_build_version
+from mr.build_env import _parse_makerrepo_url
+from mr.build_env import BuildEnv
+from mr.build_env import BuildEnvVars
+from mr.build_env import get_build_version
 
 
 def _run_git(cwd: pathlib.Path, *args: str) -> None:
@@ -59,7 +59,7 @@ def git_repo_with_remote_ssh(git_repo: pathlib.Path) -> pathlib.Path:
 
 def test_from_env_without_vars_returns_none_like():
     """from_env() with no MR_* env vars set yields None for all fields."""
-    env = CIEnv.from_env()
+    env = BuildEnv.from_env()
     assert env.build_id is None
     assert env.git_commit is None
     assert env.repository_url is None
@@ -67,11 +67,11 @@ def test_from_env_without_vars_returns_none_like():
 
 def test_from_env_reads_vars(monkeypatch: pytest.MonkeyPatch):
     """from_env() reads MR_* environment variables."""
-    monkeypatch.setenv(CIEnvVars.MR_BUILD_ID.value, "bid")
-    monkeypatch.setenv(CIEnvVars.MR_GIT_COMMIT.value, "abc123")
-    monkeypatch.setenv(CIEnvVars.MR_REPOSITORY_USERNAME.value, "u")
-    monkeypatch.setenv(CIEnvVars.MR_REPOSITORY_NAME.value, "r")
-    env = CIEnv.from_env()
+    monkeypatch.setenv(BuildEnvVars.MR_BUILD_ID.value, "bid")
+    monkeypatch.setenv(BuildEnvVars.MR_GIT_COMMIT.value, "abc123")
+    monkeypatch.setenv(BuildEnvVars.MR_REPOSITORY_USERNAME.value, "u")
+    monkeypatch.setenv(BuildEnvVars.MR_REPOSITORY_NAME.value, "r")
+    env = BuildEnv.from_env()
     assert env.build_id == "bid"
     assert env.git_commit == "abc123"
     assert env.repository_username == "u"
@@ -86,7 +86,7 @@ def test_from_local_git_repo_outside_repo_same_as_from_env(
 ):
     """Outside a git repo, from_local_git_repo() matches from_env() (no git data)."""
     monkeypatch.chdir(tmp_path)
-    env = CIEnv.from_local_git_repo()
+    env = BuildEnv.from_local_git_repo()
     assert env.git_commit is None
     assert env.git_ref is None
     assert env.git_ref_name is None
@@ -101,7 +101,7 @@ def test_from_local_git_repo_fills_commit_and_branch(
 ):
     """Inside a repo with a commit and branch, git_commit, git_ref, git_ref_name are filled."""
     monkeypatch.chdir(git_repo)
-    env = CIEnv.from_local_git_repo()
+    env = BuildEnv.from_local_git_repo()
     assert env.git_commit is not None
     assert len(env.git_commit) == 40
     assert env.git_ref is not None
@@ -116,7 +116,7 @@ def test_from_local_git_repo_detached_head_has_commit_no_symbolic_ref(
     monkeypatch.chdir(git_repo)
     _run_git(git_repo, "tag", "v1.0.0")
     _run_git(git_repo, "checkout", "v1.0.0")
-    env = CIEnv.from_local_git_repo()
+    env = BuildEnv.from_local_git_repo()
     assert env.git_commit is not None
     assert env.git_ref is None
     assert env.git_ref_name is None
@@ -127,7 +127,7 @@ def test_from_local_git_repo_fills_repository_from_remote_https(
 ):
     """With origin set to makerrepo HTTPS URL, repository_url/username/name are filled."""
     monkeypatch.chdir(git_repo_with_remote_https)
-    env = CIEnv.from_local_git_repo()
+    env = BuildEnv.from_local_git_repo()
     assert env.repository_url == "https://makerrepo.com/r/auser/arepo.git"
     assert env.repository_username == "auser"
     assert env.repository_name == "arepo"
@@ -138,7 +138,7 @@ def test_from_local_git_repo_fills_repository_from_remote_ssh(
 ):
     """With origin set to makerrepo SSH URL, repository_url/username/name are filled."""
     monkeypatch.chdir(git_repo_with_remote_ssh)
-    env = CIEnv.from_local_git_repo()
+    env = BuildEnv.from_local_git_repo()
     assert env.repository_url == "git@makerrepo.com:r/bsuser/bsrepo.git"
     assert env.repository_username == "bsuser"
     assert env.repository_name == "bsrepo"
@@ -149,9 +149,9 @@ def test_from_local_git_repo_env_takes_precedence(
 ):
     """When MR_* env vars are set, they are kept; git only fills unset fields."""
     monkeypatch.chdir(git_repo_with_remote_https)
-    monkeypatch.setenv(CIEnvVars.MR_GIT_COMMIT.value, "env-commit")
-    monkeypatch.setenv(CIEnvVars.MR_REPOSITORY_USERNAME.value, "env-user")
-    env = CIEnv.from_local_git_repo()
+    monkeypatch.setenv(BuildEnvVars.MR_GIT_COMMIT.value, "env-commit")
+    monkeypatch.setenv(BuildEnvVars.MR_REPOSITORY_USERNAME.value, "env-user")
+    env = BuildEnv.from_local_git_repo()
     assert env.git_commit == "env-commit"
     assert env.repository_username == "env-user"
     assert env.repository_name == "arepo"
@@ -166,7 +166,7 @@ def test_from_local_git_repo_uses_first_remote_when_no_origin(
         git_repo, "remote", "add", "upstream", "https://makerrepo.com/r/up/stream.git"
     )
     monkeypatch.chdir(git_repo)
-    env = CIEnv.from_local_git_repo()
+    env = BuildEnv.from_local_git_repo()
     assert env.repository_url == "https://makerrepo.com/r/up/stream.git"
     assert env.repository_username == "up"
     assert env.repository_name == "stream"
@@ -197,19 +197,19 @@ def test_parse_makerrepo_url_unknown_format_returns_none():
     assert _parse_makerrepo_url("https://example.com") == (None, None)
 
 
-# --- get_default_version ---
+# --- get_build_version ---
 
 
 @pytest.mark.parametrize(
     "env,expected",
     [
         pytest.param(
-            CIEnv(git_ref="refs/tags/v2.0.0", git_ref_name="v2.0.0"),
+            BuildEnv(git_ref="refs/tags/v2.0.0", git_ref_name="v2.0.0"),
             "v2.0.0",
             id="tag_returns_tag_name",
         ),
         pytest.param(
-            CIEnv(
+            BuildEnv(
                 git_ref="refs/tags/v3.0.0",
                 git_ref_name="v3.0.0",
                 build_number=999,
@@ -217,15 +217,15 @@ def test_parse_makerrepo_url_unknown_format_returns_none():
             "v3.0.0",
             id="tag_takes_precedence_over_build_number",
         ),
-        pytest.param(CIEnv(build_number=123), "123", id="build_number_when_no_tag"),
+        pytest.param(BuildEnv(build_number=123), "123", id="build_number_when_no_tag"),
         pytest.param(
-            CIEnv(git_commit="a1b2c3d4e5f6"),
+            BuildEnv(git_commit="a1b2c3d4e5f6"),
             "a1b2",
             id="commit_short_when_no_tag_or_build_number",
         ),
-        pytest.param(CIEnv(), "unknown", id="unknown_when_all_none"),
+        pytest.param(BuildEnv(), "unknown", id="unknown_when_all_none"),
         pytest.param(
-            CIEnv(
+            BuildEnv(
                 git_ref="refs/heads/main",
                 git_ref_name="main",
                 git_commit="abc123456789",
@@ -235,8 +235,8 @@ def test_parse_makerrepo_url_unknown_format_returns_none():
         ),
     ],
 )
-def test_get_default_version(env: CIEnv, expected: str):
-    """get_default_version returns expected string for given CIEnv."""
+def test_get_build_version(env: BuildEnv, expected: str):
+    """get_build_version returns expected string for given BuildEnv."""
     assert get_build_version(env=env) == expected
 
 
@@ -249,9 +249,9 @@ def test_get_default_version(env: CIEnv, expected: str):
         pytest.param(None, "a1b2c3d4e5f6", id="full_hash"),
     ],
 )
-def test_get_default_version_commit_hash_length(
+def test_get_build_version_commit_hash_length(
     commit_hash_length: int | None, expected: str
 ):
     """commit_hash_length controls how many leading commit-hash characters are used."""
-    env = CIEnv(git_commit="a1b2c3d4e5f6")
+    env = BuildEnv(git_commit="a1b2c3d4e5f6")
     assert get_build_version(env=env, commit_hash_length=commit_hash_length) == expected

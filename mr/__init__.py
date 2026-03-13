@@ -1,6 +1,6 @@
-from .ci import CIEnv
-from .ci import CIEnvVars
-from .ci import get_build_version
+from .build_env import BuildEnv
+from .build_env import BuildEnvVars
+from .build_env import get_build_version
 from .data_types import Artifact
 from .data_types import Cached
 from .data_types import Customizable
@@ -21,7 +21,7 @@ __all__ = [
     "FieldError",
     "GeneratorValidationError",
     "Result",
-    "CIEnvVars",
-    "CIEnv",
+    "BuildEnvVars",
+    "BuildEnv",
     "get_build_version",
 ]

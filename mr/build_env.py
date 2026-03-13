@@ -73,7 +73,7 @@ def _parse_makerrepo_url(url: str) -> tuple[str | None, str | None]:
 
 
 @enum.unique
-class CIEnvVars(enum.Enum):
+class BuildEnvVars(enum.Enum):
     # the uuid of build job
     MR_BUILD_ID = "MR_BUILD_ID"
     # the number of build job
@@ -93,7 +93,7 @@ class CIEnvVars(enum.Enum):
 
 
 @dataclasses.dataclass(frozen=True)
-class CIEnv:
+class BuildEnv:
     build_id: str | None = None
     build_number: int | None = None
     git_commit: str | None = None
@@ -106,14 +106,14 @@ class CIEnv:
     @classmethod
     def from_env(cls) -> Self:
         return cls(
-            build_id=os.getenv(CIEnvVars.MR_BUILD_ID.value),
-            build_number=os.getenv(CIEnvVars.MR_BUILD_NUMBER.value),
-            git_commit=os.getenv(CIEnvVars.MR_GIT_COMMIT.value),
-            git_ref=os.getenv(CIEnvVars.MR_GIT_REF.value),
-            git_ref_name=os.getenv(CIEnvVars.MR_GIT_REF_NAME.value),
-            repository_name=os.getenv(CIEnvVars.MR_REPOSITORY_NAME.value),
-            repository_username=os.getenv(CIEnvVars.MR_REPOSITORY_USERNAME.value),
-            repository_url=os.getenv(CIEnvVars.MR_REPOSITORY_URL.value),
+            build_id=os.getenv(BuildEnvVars.MR_BUILD_ID.value),
+            build_number=os.getenv(BuildEnvVars.MR_BUILD_NUMBER.value),
+            git_commit=os.getenv(BuildEnvVars.MR_GIT_COMMIT.value),
+            git_ref=os.getenv(BuildEnvVars.MR_GIT_REF.value),
+            git_ref_name=os.getenv(BuildEnvVars.MR_GIT_REF_NAME.value),
+            repository_name=os.getenv(BuildEnvVars.MR_REPOSITORY_NAME.value),
+            repository_username=os.getenv(BuildEnvVars.MR_REPOSITORY_USERNAME.value),
+            repository_url=os.getenv(BuildEnvVars.MR_REPOSITORY_URL.value),
         )
 
     @classmethod
@@ -141,7 +141,7 @@ class CIEnv:
 
 
 def get_build_version(
-    env: CIEnv | None = None,
+    env: BuildEnv | None = None,
     commit_hash_length: int | None = 4,
 ) -> str:
     """Get the default version string for the current build, which is sensible enough for most cases.
@@ -154,14 +154,14 @@ def get_build_version(
        is None, use the full hash.
     4. Return "unknown".
 
-    :param env: CI environment; if None, obtained from the local git repo.
+    :param env: build environment; if None, obtained from the local git repo.
     :param commit_hash_length: Number of leading commit-hash characters to use
         when falling back to commit (step 3). None means use the full hash.
         Default is 4.
     :return: The default version string.
     """
     if env is None:
-        env = CIEnv.from_local_git_repo()
+        env = BuildEnv.from_local_git_repo()
     if env.git_ref and env.git_ref.startswith("refs/tags/") and env.git_ref_name:
         return env.git_ref_name
     if env.build_number is not None:
