@@ -1,6 +1,5 @@
 from .build_env import BuildEnv
 from .build_env import BuildEnvVars
-from .build_env import get_build_version
 from .data_types import Artifact
 from .data_types import Cached
 from .data_types import Customizable
@@ -23,5 +22,4 @@ __all__ = [
     "Result",
     "BuildEnvVars",
     "BuildEnv",
-    "get_build_version",
 ]

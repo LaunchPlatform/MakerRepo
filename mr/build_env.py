@@ -116,6 +116,35 @@ class BuildEnv:
     repository_username: str | None = None
     repository_url: str | None = None
 
+    def get_build_version(self, commit_hash_length: int | None = 4) -> str:
+        """Get the default version string for this build environment.
+
+        Precedence order:
+        1. If ``build_version`` is set (non-empty), return it (e.g. from ``MR_BUILD_VERSION``).
+        2. If the current git reference is a tag, return the tag name.
+        3. If the build number is set, return the build number.
+        4. If the git commit is set, return the first ``commit_hash_length``
+           characters of the commit hash (default 4). If ``commit_hash_length``
+           is None, use the full hash.
+        5. Return "unknown".
+
+        :param commit_hash_length: Number of leading commit-hash characters to use
+            when falling back to commit (step 4). None means use the full hash.
+            Default is 4.
+        :return: The default version string.
+        """
+        if self.build_version and self.build_version.strip():
+            return self.build_version.strip()
+        if self.git_ref and self.git_ref.startswith("refs/tags/") and self.git_ref_name:
+            return self.git_ref_name
+        if self.build_number is not None:
+            return str(self.build_number)
+        if self.git_commit is not None:
+            if commit_hash_length is None:
+                return self.git_commit
+            return self.git_commit[:commit_hash_length]
+        return "unknown"
+
     @classmethod
     def from_env(cls) -> Self:
         return cls(
@@ -155,39 +184,3 @@ class BuildEnv:
             if env.repository_name is None and name:
                 replacements["repository_name"] = name
         return dataclasses.replace(env, **replacements)
-
-
-def get_build_version(
-    env: BuildEnv | None = None,
-    commit_hash_length: int | None = 4,
-) -> str:
-    """Get the default version string for the current build, which is sensible enough for most cases.
-
-    Precedence order:
-    1. If ``env.build_version`` is set (non-empty), return it (e.g. from ``MR_BUILD_VERSION``).
-    2. If the current git reference is a tag, return the tag name.
-    3. If the build number is set, return the build number.
-    4. If the git commit is set, return the first ``commit_hash_length``
-       characters of the commit hash (default 4). If ``commit_hash_length``
-       is None, use the full hash.
-    5. Return "unknown".
-
-    :param env: build environment; if None, obtained from the local git repo.
-    :param commit_hash_length: Number of leading commit-hash characters to use
-        when falling back to commit (step 3). None means use the full hash.
-        Default is 4.
-    :return: The default version string.
-    """
-    if env is None:
-        env = BuildEnv.from_local_git_repo()
-    if env.build_version and env.build_version.strip():
-        return env.build_version.strip()
-    if env.git_ref and env.git_ref.startswith("refs/tags/") and env.git_ref_name:
-        return env.git_ref_name
-    if env.build_number is not None:
-        return str(env.build_number)
-    if env.git_commit is not None:
-        if commit_hash_length is None:
-            return env.git_commit
-        return env.git_commit[:commit_hash_length]
-    return "unknown"

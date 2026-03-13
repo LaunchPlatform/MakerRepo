@@ -6,7 +6,6 @@ import pytest
 from mr.build_env import _parse_makerrepo_url
 from mr.build_env import BuildEnv
 from mr.build_env import BuildEnvVars
-from mr.build_env import get_build_version
 
 
 def _run_git(cwd: pathlib.Path, *args: str) -> None:
@@ -242,13 +241,13 @@ def test_get_build_version_build_version_takes_precedence():
         build_number=42,
         git_commit="abc123",
     )
-    assert get_build_version(env=env) == "1.2.3-custom"
+    assert env.get_build_version() == "1.2.3-custom"
 
 
 def test_get_build_version_build_version_empty_falls_through():
     """Empty or whitespace env.build_version is ignored; normal precedence applies."""
     env = BuildEnv(build_version="   ", git_commit="a1b2c3d4e5f6")
-    assert get_build_version(env=env) == "a1b2"
+    assert env.get_build_version() == "a1b2"
 
 
 def test_get_build_version_from_env_reads_mr_build_version(
@@ -258,13 +257,13 @@ def test_get_build_version_from_env_reads_mr_build_version(
     monkeypatch.setenv(BuildEnvVars.MR_BUILD_VERSION.value, "2.0.0-from-env")
     env = BuildEnv.from_env()
     assert env.build_version == "2.0.0-from-env"
-    assert get_build_version(env=env) == "2.0.0-from-env"
+    assert env.get_build_version() == "2.0.0-from-env"
 
 
 def test_get_build_version_build_version_unset_uses_normal_precedence():
     """When build_version is not set on env, version comes from tag/build/commit."""
     env = BuildEnv(git_ref="refs/tags/v2.0.0", git_ref_name="v2.0.0")
-    assert get_build_version(env=env) == "v2.0.0"
+    assert env.get_build_version() == "v2.0.0"
 
 
 @pytest.mark.parametrize(
@@ -315,7 +314,7 @@ def test_get_build_version_build_version_unset_uses_normal_precedence():
 )
 def test_get_build_version(env: BuildEnv, expected: str):
     """get_build_version returns expected string for given BuildEnv."""
-    assert get_build_version(env=env) == expected
+    assert env.get_build_version() == expected
 
 
 @pytest.mark.parametrize(
@@ -332,4 +331,4 @@ def test_get_build_version_commit_hash_length(
 ):
     """commit_hash_length controls how many leading commit-hash characters are used."""
     env = BuildEnv(git_commit="a1b2c3d4e5f6")
-    assert get_build_version(env=env, commit_hash_length=commit_hash_length) == expected
+    assert env.get_build_version(commit_hash_length=commit_hash_length) == expected
