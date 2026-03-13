@@ -92,6 +92,15 @@ class BuildEnvVars(enum.Enum):
     MR_REPOSITORY_USERNAME = "MR_REPOSITORY_USERNAME"
     # the full git url of the repository
     MR_REPOSITORY_URL = "MR_REPOSITORY_URL"
+    # set to 1, true, or yes to disable versioned model build
+    MR_VERSIONED_MODEL_DISABLED = "MR_VERSIONED_MODEL_DISABLED"
+
+
+def _env_bool(value: str | None) -> bool:
+    """Return True if value is a truthy env string (1, true, yes); otherwise False."""
+    if not value or not value.strip():
+        return False
+    return value.strip().lower() in ("1", "true", "yes")
 
 
 @dataclasses.dataclass(frozen=True)
@@ -99,6 +108,7 @@ class BuildEnv:
     build_id: str | None = None
     build_number: int | None = None
     build_version: str | None = None
+    versioned_model_disabled: bool = False
     git_commit: str | None = None
     git_ref: str | None = None
     git_ref_name: str | None = None
@@ -112,6 +122,9 @@ class BuildEnv:
             build_id=os.getenv(BuildEnvVars.MR_BUILD_ID.value),
             build_number=os.getenv(BuildEnvVars.MR_BUILD_NUMBER.value),
             build_version=os.getenv(BuildEnvVars.MR_BUILD_VERSION.value),
+            versioned_model_disabled=_env_bool(
+                os.getenv(BuildEnvVars.MR_VERSIONED_MODEL_DISABLED.value)
+            ),
             git_commit=os.getenv(BuildEnvVars.MR_GIT_COMMIT.value),
             git_ref=os.getenv(BuildEnvVars.MR_GIT_REF.value),
             git_ref_name=os.getenv(BuildEnvVars.MR_GIT_REF_NAME.value),

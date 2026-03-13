@@ -63,6 +63,7 @@ def test_from_env_without_vars_returns_none_like():
     assert env.build_id is None
     assert env.git_commit is None
     assert env.repository_url is None
+    assert env.versioned_model_disabled is False
 
 
 def test_from_env_reads_vars(monkeypatch: pytest.MonkeyPatch):
@@ -76,6 +77,38 @@ def test_from_env_reads_vars(monkeypatch: pytest.MonkeyPatch):
     assert env.git_commit == "abc123"
     assert env.repository_username == "u"
     assert env.repository_name == "r"
+
+
+@pytest.mark.parametrize(
+    "value,expected",
+    [
+        ("1", True),
+        ("true", True),
+        ("True", True),
+        ("yes", True),
+        ("YES", True),
+        ("", False),
+        ("0", False),
+        ("false", False),
+        ("no", False),
+    ],
+)
+def test_from_env_versioned_model_disabled(
+    monkeypatch: pytest.MonkeyPatch, value: str, expected: bool
+):
+    """from_env() sets versioned_model_disabled from MR_VERSIONED_MODEL_DISABLED (1/true/yes => True)."""
+    monkeypatch.setenv(BuildEnvVars.MR_VERSIONED_MODEL_DISABLED.value, value)
+    env = BuildEnv.from_env()
+    assert env.versioned_model_disabled is expected
+
+
+def test_from_env_versioned_model_disabled_unset_defaults_false(
+    monkeypatch: pytest.MonkeyPatch,
+):
+    """When MR_VERSIONED_MODEL_DISABLED is unset, versioned_model_disabled is False."""
+    monkeypatch.delenv(BuildEnvVars.MR_VERSIONED_MODEL_DISABLED.value, raising=False)
+    env = BuildEnv.from_env()
+    assert env.versioned_model_disabled is False
 
 
 # --- from_local_git_repo: not in a repo ---
