@@ -200,9 +200,54 @@ def test_parse_makerrepo_url_unknown_format_returns_none():
 # --- get_build_version ---
 
 
+def test_get_build_version_build_version_takes_precedence():
+    """env.build_version overrides tag, build number, and commit."""
+    env = BuildEnv(
+        build_version="1.2.3-custom",
+        git_ref="refs/tags/v9.0.0",
+        git_ref_name="v9.0.0",
+        build_number=42,
+        git_commit="abc123",
+    )
+    assert get_build_version(env=env) == "1.2.3-custom"
+
+
+def test_get_build_version_build_version_empty_falls_through():
+    """Empty or whitespace env.build_version is ignored; normal precedence applies."""
+    env = BuildEnv(build_version="   ", git_commit="a1b2c3d4e5f6")
+    assert get_build_version(env=env) == "a1b2"
+
+
+def test_get_build_version_from_env_reads_mr_build_version(
+    monkeypatch: pytest.MonkeyPatch,
+):
+    """BuildEnv.from_env() sets build_version from MR_BUILD_VERSION; get_build_version uses it."""
+    monkeypatch.setenv(BuildEnvVars.MR_BUILD_VERSION.value, "2.0.0-from-env")
+    env = BuildEnv.from_env()
+    assert env.build_version == "2.0.0-from-env"
+    assert get_build_version(env=env) == "2.0.0-from-env"
+
+
+def test_get_build_version_build_version_unset_uses_normal_precedence():
+    """When build_version is not set on env, version comes from tag/build/commit."""
+    env = BuildEnv(git_ref="refs/tags/v2.0.0", git_ref_name="v2.0.0")
+    assert get_build_version(env=env) == "v2.0.0"
+
+
 @pytest.mark.parametrize(
     "env,expected",
     [
+        pytest.param(
+            BuildEnv(
+                build_version="override-1.0",
+                git_ref="refs/tags/v2.0.0",
+                git_ref_name="v2.0.0",
+                build_number=99,
+                git_commit="abc123",
+            ),
+            "override-1.0",
+            id="build_version_overrides_tag_and_rest",
+        ),
         pytest.param(
             BuildEnv(git_ref="refs/tags/v2.0.0", git_ref_name="v2.0.0"),
             "v2.0.0",

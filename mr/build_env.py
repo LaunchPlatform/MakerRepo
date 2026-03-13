@@ -78,6 +78,8 @@ class BuildEnvVars(enum.Enum):
     MR_BUILD_ID = "MR_BUILD_ID"
     # the number of build job
     MR_BUILD_NUMBER = "MR_BUILD_NUMBER"
+    # the version string of the build to override the default version string
+    MR_BUILD_VERSION = "MR_BUILD_VERSION"
     # the git commit hash value
     MR_GIT_COMMIT = "MR_GIT_COMMIT"
     # the full git reference, e.g. refs/heads/master or refs/tags/v1.0.0
@@ -96,6 +98,7 @@ class BuildEnvVars(enum.Enum):
 class BuildEnv:
     build_id: str | None = None
     build_number: int | None = None
+    build_version: str | None = None
     git_commit: str | None = None
     git_ref: str | None = None
     git_ref_name: str | None = None
@@ -108,6 +111,7 @@ class BuildEnv:
         return cls(
             build_id=os.getenv(BuildEnvVars.MR_BUILD_ID.value),
             build_number=os.getenv(BuildEnvVars.MR_BUILD_NUMBER.value),
+            build_version=os.getenv(BuildEnvVars.MR_BUILD_VERSION.value),
             git_commit=os.getenv(BuildEnvVars.MR_GIT_COMMIT.value),
             git_ref=os.getenv(BuildEnvVars.MR_GIT_REF.value),
             git_ref_name=os.getenv(BuildEnvVars.MR_GIT_REF_NAME.value),
@@ -147,12 +151,13 @@ def get_build_version(
     """Get the default version string for the current build, which is sensible enough for most cases.
 
     Precedence order:
-    1. If the current git reference is a tag, return the tag name.
-    2. If the build number is set, return the build number.
-    3. If the git commit is set, return the first ``commit_hash_length``
+    1. If ``env.build_version`` is set (non-empty), return it (e.g. from ``MR_BUILD_VERSION``).
+    2. If the current git reference is a tag, return the tag name.
+    3. If the build number is set, return the build number.
+    4. If the git commit is set, return the first ``commit_hash_length``
        characters of the commit hash (default 4). If ``commit_hash_length``
        is None, use the full hash.
-    4. Return "unknown".
+    5. Return "unknown".
 
     :param env: build environment; if None, obtained from the local git repo.
     :param commit_hash_length: Number of leading commit-hash characters to use
@@ -162,6 +167,8 @@ def get_build_version(
     """
     if env is None:
         env = BuildEnv.from_local_git_repo()
+    if env.build_version and env.build_version.strip():
+        return env.build_version.strip()
     if env.git_ref and env.git_ref.startswith("refs/tags/") and env.git_ref_name:
         return env.git_ref_name
     if env.build_number is not None:
