@@ -6,7 +6,7 @@ import pytest
 from mr.ci import _parse_makerrepo_url
 from mr.ci import CIEnv
 from mr.ci import CIEnvVars
-from mr.ci import get_default_version
+from mr.ci import get_build_version
 
 
 def _run_git(cwd: pathlib.Path, *args: str) -> None:
@@ -237,7 +237,7 @@ def test_parse_makerrepo_url_unknown_format_returns_none():
 )
 def test_get_default_version(env: CIEnv, expected: str):
     """get_default_version returns expected string for given CIEnv."""
-    assert get_default_version(env=env) == expected
+    assert get_build_version(env=env) == expected
 
 
 @pytest.mark.parametrize(
@@ -254,6 +254,4 @@ def test_get_default_version_commit_hash_length(
 ):
     """commit_hash_length controls how many leading commit-hash characters are used."""
     env = CIEnv(git_commit="a1b2c3d4e5f6")
-    assert (
-        get_default_version(env=env, commit_hash_length=commit_hash_length) == expected
-    )
+    assert get_build_version(env=env, commit_hash_length=commit_hash_length) == expected

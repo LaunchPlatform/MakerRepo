@@ -140,7 +140,7 @@ class CIEnv:
         return dataclasses.replace(env, **replacements)
 
 
-def get_default_version(
+def get_build_version(
     env: CIEnv | None = None,
     commit_hash_length: int | None = 4,
 ) -> str:
