@@ -75,6 +75,13 @@ class ArtifactsConfig(BaseModel):
 class RepoConfig(BaseModel):
     """Repo-level config loaded from .makerrepo/config.yaml (or REPO_CONFIG_PATH)."""
 
+    pythonpaths: list[str] = Field(
+        default_factory=list,
+        description=(
+            "A list of paths to prepend to sys.path before importing user code. "
+            "Useful for src/ layouts (e.g. add 'src')."
+        ),
+    )
     artifacts: ArtifactsConfig | None = Field(
         default=None, description="Artifacts section"
     )

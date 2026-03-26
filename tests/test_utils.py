@@ -7,6 +7,7 @@ from mr import Artifact
 from mr.data_types import ArtifactsConfig
 from mr.data_types import DefaultArtifactConfig
 from mr.data_types import RepoConfig
+from mr.utils import apply_pythonpaths
 from mr.utils import apply_repo_config
 from mr.utils import find_python_modules
 from mr.utils import find_python_packages
@@ -34,6 +35,8 @@ def test_load_repo_config_custom_path_valid_yaml(tmp_path: pathlib.Path):
     config_file = tmp_path / "config.yaml"
     config_file.write_text(
         """
+pythonpaths:
+  - src
 artifacts:
   default_config:
     export_step: false
@@ -41,6 +44,7 @@ artifacts:
 """
     )
     config = load_repo_config(config_file)
+    assert config.pythonpaths == ["src"]
     assert config.artifacts is not None
     assert config.artifacts.default_config.export_step is False
     assert config.artifacts.default_config.export_3mf is True
@@ -51,7 +55,66 @@ def test_load_repo_config_empty_yaml_returns_default(tmp_path: pathlib.Path):
     config_file = tmp_path / "empty.yaml"
     config_file.write_text("")
     config = load_repo_config(config_file)
+    assert config.pythonpaths == []
     assert config.artifacts is None
+
+
+def test_apply_pythonpaths_prepends_to_sys_path(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+):
+    (tmp_path / "src").mkdir()
+    config = RepoConfig(pythonpaths=["src"])
+    monkeypatch.chdir(tmp_path)
+    before = list(__import__("sys").path)
+    with apply_pythonpaths(config) as added:
+        assert added and added[0].endswith("/src")
+        assert __import__("sys").path[0] == added[0]
+        # Ensure we didn't blow away sys.path
+        assert len(__import__("sys").path) >= len(before)
+    assert __import__("sys").path == before
+
+
+def test_apply_pythonpaths_resolves_relative_to_repo_root(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+):
+    repo_root = tmp_path / "repo"
+    (repo_root / "src").mkdir(parents=True)
+    config = RepoConfig(pythonpaths=["src"])
+    monkeypatch.chdir(tmp_path)  # different cwd on purpose
+    before = list(__import__("sys").path)
+    with apply_pythonpaths(config, repo_root=repo_root) as added:
+        assert added == [str((repo_root / "src").resolve())]
+        assert __import__("sys").path[0] == added[0]
+    assert __import__("sys").path == before
+
+
+def test_apply_pythonpaths_does_not_remove_external_duplicate(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+):
+    """
+    If user code adds the same path again during the context, the context manager
+    should only remove its own inserted occurrence and leave the external one.
+    """
+    sys = __import__("sys")
+    (tmp_path / "src").mkdir()
+    config = RepoConfig(pythonpaths=["src"])
+    monkeypatch.chdir(tmp_path)
+
+    before = list(sys.path)
+    try:
+        with apply_pythonpaths(config) as added:
+            assert len(added) == 1
+            value = added[0]
+            assert sys.path[0] == value
+            # Simulate other code adding the same path during the context.
+            sys.path.append(value)
+            assert sys.path.count(value) == 2
+        # Our inserted occurrence is removed, but the "external" one remains.
+        assert value in sys.path
+        assert sys.path.count(value) == 1
+    finally:
+        # Restore sys.path so this test doesn't affect others.
+        sys.path[:] = before
 
 
 def test_apply_repo_config_fills_none_from_config():

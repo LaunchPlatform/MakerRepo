@@ -1,7 +1,9 @@
+import contextlib
 import dataclasses
 import importlib
 import os
 import pathlib
+import sys
 from importlib.machinery import SourceFileLoader
 from types import ModuleType
 
@@ -11,6 +13,46 @@ from .constants import REPO_CONFIG_PATH
 from .data_types import Artifact
 from .data_types import DefaultArtifactConfig
 from .data_types import RepoConfig
+
+
+@contextlib.contextmanager
+def apply_pythonpaths(
+    config: RepoConfig, repo_root: str | pathlib.Path | None = None
+) -> list[str]:
+    """
+    Temporarily prepend configured python paths to sys.path.
+
+    Paths are interpreted relative to ``repo_root`` when provided; otherwise relative
+    to the current working directory.
+    """
+    if not config.pythonpaths:
+        yield []
+        return
+
+    root = pathlib.Path(repo_root) if repo_root is not None else pathlib.Path.cwd()
+    added: list[str] = []
+
+    # Insert in reverse so the first entry ends up first in sys.path.
+    for raw in reversed(config.pythonpaths):
+        if not raw or not raw.strip():
+            continue
+        p = pathlib.Path(raw)
+        if not p.is_absolute():
+            p = root / p
+        value = str(p.resolve())
+        if value in sys.path:
+            continue
+        sys.path.insert(0, value)
+        added.append(value)
+
+    added.reverse()
+    try:
+        yield added
+    finally:
+        # Remove only what we added (one occurrence each).
+        for value in added:
+            if value in sys.path:
+                sys.path.remove(value)
 
 
 def load_module(module_spec: str) -> ModuleType:
