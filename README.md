@@ -1,5 +1,7 @@
 # MakerRepo
 
+[![CircleCI](https://circleci.com/gh/LaunchPlatform/MakerRepo/tree/master.svg?style=svg)](https://app.circleci.com/pipelines/github/LaunchPlatform/MakerRepo)
+
 **MakerRepo** is an open-source Python library that brings the [Manufacturing as Code](https://docs.makerrepo.com/) concept into the [Build123D](https://github.com/gumyr/build123d) ecosystem.
 It is designed to have **as little impact on your existing Build123D project as possible** — add a dependency and a few decorators; your models and workflow stay the same.
 
